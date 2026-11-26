@@ -123,26 +123,27 @@ export function createRunwayRenderer(gl, airfields, terrain) {
     },
     /** Edge, threshold, end and approach lights, plus each PAPI as seen from `eye`. */
     emitLights(sprites, eye, night, time) {
-      const strength = 0.55 + night * 0.9;
+      const strength = 0.55 + night * 1.2;
+      const glow = 1 + night * 0.8;
       for (const strip of strips) {
         const { field, ends, along, across } = strip;
         const y = field.elevation + 0.5;
         for (let v = 0; v <= field.length; v += 60) {
           for (const s of [-1, 1]) {
-            sprites.light([ends[0].x + along[0] * v + across[0] * s * (field.width / 2 + 1.5), y, ends[0].z + along[2] * v + across[2] * s * (field.width / 2 + 1.5)], [1, 0.95, 0.8], 0.9, strength * 0.8);
+            sprites.light([ends[0].x + along[0] * v + across[0] * s * (field.width / 2 + 1.5), y, ends[0].z + along[2] * v + across[2] * s * (field.width / 2 + 1.5)], [1, 0.95, 0.8], 0.9 * glow, strength * 0.8);
           }
         }
         for (let e = 0; e < 2; e++) {
           const dir = e === 0 ? along : along.map((v) => -v);
           for (let u = -field.width / 2; u <= field.width / 2 + 0.1; u += field.width / 7) {
-            sprites.light([ends[e].x + across[0] * u - dir[0] * 2, y, ends[e].z + across[2] * u - dir[2] * 2], [0.2, 1, 0.35], 1.0, strength);
+            sprites.light([ends[e].x + across[0] * u - dir[0] * 2, y, ends[e].z + across[2] * u - dir[2] * 2], [0.2, 1, 0.35], 1.0 * glow, strength);
           }
           for (let d = 30; d <= 300; d += 30) {
             const px = ends[e].x - dir[0] * d;
             const pz = ends[e].z - dir[2] * d;
             const py = Math.max(terrain.heightAt(px, pz), 0) + 1.5;
             const rabbit = Math.floor((time * 2.2) % 1 * 10) === Math.floor((300 - d) / 30) ? 2.2 : 1;
-            sprites.light([px, py, pz], [1, 0.97, 0.9], 1.1 * rabbit, strength * rabbit * 0.8);
+            sprites.light([px, py, pz], [1, 0.97, 0.9], 1.1 * rabbit * glow, strength * rabbit * 0.8);
             if (d === 150) {
               for (const s of [-1, 1]) for (let k = 1; k <= 3; k++) sprites.light([px + across[0] * s * k * 4.5, py, pz + across[2] * s * k * 4.5], [1, 0.97, 0.9], 1.0, strength * 0.8);
             }

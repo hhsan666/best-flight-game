@@ -246,7 +246,7 @@ function renderFrame(dt, readout) {
     const target = director.target(plane);
     const course = target ? ((Math.atan2(target.position[0] - plane.position[0], -(target.position[2] - plane.position[2])) * 180) / Math.PI + 360) % 360 : null;
     hud.draw({
-      plane, readout, camera, target, course, time: game.time, cockpit: rig.mode === 'cockpit', assist: settings.assist,
+      plane, readout, camera, target, course, time: game.time, cockpit: rig.mode === 'cockpit', assist: settings.assist, rain: game.atmosphere.rain,
       mission: director.hudMission(), warnings: warningsFor(plane, readout), messages: director.state.messages,
       mapTargets: director.mapTargets(), fuelMinutes: enduranceMinutes(plane.engine),
     });

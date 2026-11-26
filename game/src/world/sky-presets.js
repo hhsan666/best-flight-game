@@ -38,7 +38,7 @@ const PRESETS = {
     label: 'Squall',
     sun: [200, 32], sunColor: [0.9, 0.92, 0.95], sunPower: 0.95,
     zenith: [0.42, 0.47, 0.54], horizon: [0.62, 0.65, 0.68], fog: [0.6, 0.63, 0.66],
-    groundAmbient: [0.26, 0.27, 0.27], fogDensity: 0.00026, fogFalloff: 0.0009, exposure: 1.6, night: 0.15, clouds: 0.85,
+    groundAmbient: [0.26, 0.27, 0.27], fogDensity: 0.00026, fogFalloff: 0.0009, exposure: 1.6, night: 0.15, clouds: 0.85, rain: 0.75,
   },
 };
 
@@ -66,6 +66,7 @@ export function buildAtmosphere(name) {
     exposure: p.exposure,
     night: p.night,
     clouds: p.clouds,
+    rain: p.rain ?? 0,
     snowLine: 860,
   };
 }

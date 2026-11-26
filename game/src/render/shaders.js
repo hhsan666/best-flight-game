@@ -401,7 +401,7 @@ ${ATMOSPHERE}
 void main() {
   vec4 puff = texture(uPuff, vUv);
   float light = mix(0.55, 1.15, clamp(vShade.x + (vUv.y - 0.5) * 0.5, 0.0, 1.0));
-  vec3 color = (uSkyAmbient * 1.15 + uSunColor * 0.85 * light) * mix(1.0, 0.7, uCloudiness);
+  vec3 color = (uSkyAmbient * 1.15 + uSunColor * 0.85 * light) * mix(1.0, 0.7, uCloudiness) * mix(1.0, 0.62, smoothstep(0.6, 0.9, uCloudiness));
   color = applyFog(color, vWorld);
   outColor = vec4(toDisplay(color), puff.a * vShade.y);
 }`;

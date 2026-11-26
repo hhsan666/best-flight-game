@@ -4,6 +4,7 @@
 import { drawInstrumentPanel, MONO, SANS } from './instrument-panel.js';
 import { KNOTS, FEET, FEET_PER_MINUTE, SALTRUNNER } from '../flight/aircraft-spec.js';
 import { projectPoint } from '../core/vector-math.js';
+import { drawRain } from './rain-overlay.js';
 
 const GREEN = '#a6ffcf';
 const AMBER = '#ffc23a';
@@ -328,6 +329,7 @@ export function createFlightHud(canvas, minimap) {
       ctx.clearRect(0, 0, W, H);
       const { plane, readout } = view;
       const kt = readout.airspeed * KNOTS;
+      drawRain(ctx, W, H, view.rain ?? 0, view.time, readout.airspeed, view.cockpit);
       if (view.cockpit) canopyFrame();
       flightPathMarker(view.camera, plane);
       targetMarker(view.camera, view.target);

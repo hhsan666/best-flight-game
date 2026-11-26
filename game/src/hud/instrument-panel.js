@@ -23,6 +23,12 @@ function bezel(ctx, x, y, r, label) {
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
+  ctx.fillStyle = '#3a3e45';
+  for (const a of [0.785, 2.356, 3.927, 5.498]) {
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(a) * r * 1.0, y + Math.sin(a) * r * 1.0, r * 0.045, 0, Math.PI * 2);
+    ctx.fill();
+  }
   const backlight = ctx.createRadialGradient(x, y, r * 0.3, x, y, r);
   backlight.addColorStop(0, 'rgba(255,190,110,0.0)');
   backlight.addColorStop(1, 'rgba(255,170,90,0.16)');

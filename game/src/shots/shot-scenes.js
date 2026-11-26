@@ -69,7 +69,7 @@ const SHOTS = {
     st.cleared = 4;
     st.elapsed = 162;
     const at = approachTo(st.rings, 4, 250, 6);
-    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) - 4, 3, 12, 52, 0.72, 0);
+    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 7, 3, 12, 52, 0.72, 0);
     api.game.time = 51.5;
     api.rig.mode = 'chase';
     api.rig.reset(api.game.plane);
@@ -112,6 +112,25 @@ const SHOTS = {
     const eye = [0, 1, 2].map((i) => plane.position[i] - forward[i] * 15 - right[i] * 3 + (i === 1 ? 4.6 : 0));
     const target = [low.x + forward[0] * 230, field.elevation + 4, low.z + forward[2] * 230];
     api.rig.override = { eye, target, up: [0, 1, 0], fov: 56 };
+  },
+  /** Lantern Run's last leg from the cockpit: a dusk final into lit runway 07 over Port Halloway. */
+  nightFinal(api) {
+    api.startMission(missionById('lantern-run'));
+    const st = api.game.director.state;
+    st.step = 1;
+    st.cleared = 7;
+    st.nextRing = 7;
+    st.elapsed = 287;
+    const field = AIRFIELDS[0];
+    const [low] = runwayEnds(field);
+    const h = low.heading * DEG;
+    const d = 380;
+    const at = [low.x - Math.sin(h) * d, field.elevation + (300 + d) * Math.tan(3 * DEG) + 1.5, low.z + Math.cos(h) * d];
+    pose(api.game.plane, at, low.heading, -4, 0, 34, 0.25, 2);
+    api.game.plane.velocity[1] = -1.8;
+    api.game.plane.landingLight = true;
+    api.game.time = 70.3;
+    api.rig.mode = 'cockpit';
   },
   /** Squall Final: crabbing into the crosswind on short final to runway 25, flaps out, lights on. */
   squall(api) {

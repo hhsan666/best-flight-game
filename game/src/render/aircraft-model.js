@@ -28,8 +28,11 @@ const FUSELAGE = [
   { z: 4.12, width: 0.08, top: 0.08, bottom: 0.05, y: 0.24 },
 ];
 
+const ANTI_GLARE = [0.1, 0.11, 0.12, MATTE];
+
 function fuselageColour(section, angle) {
   const side = Math.cos(angle);
+  if (section.z < -1.5 && side > 0.86) return ANTI_GLARE;
   if (section.z < -2.5) return side > -0.2 ? TEAL : BELLY;
   if (side < -0.62) return BELLY;
   if (side > -0.22 && side < 0.12) return TEAL;
