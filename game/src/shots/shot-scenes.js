@@ -59,6 +59,20 @@ const SHOTS = {
     api.rig.reset(api.game.plane);
     settleChase(api);
   },
+  /** Silverrun Gates: the instant the Saltrunner threads gate 6, the glowing hoop around it. */
+  gatePass(api) {
+    api.startMission(missionById('silverrun-gates'));
+    const st = api.game.director.state;
+    st.nextRing = 5;
+    st.cleared = 5;
+    st.elapsed = 61;
+    const at = approachTo(st.rings, 5, 24, 1.5);
+    pose(api.game.plane, at, headingBetween(at, st.rings[5].position) + 2, 2, -18, 55, 0.85, 0);
+    api.game.time = 44.5;
+    api.rig.mode = 'chase';
+    api.rig.reset(api.game.plane);
+    settleChase(api);
+  },
   /** Cover. First Light along the harbour coast: beach, shallows, forest and the Cairnhold peaks, ring 5 ahead. */
   coast(api) {
     api.startMission(missionById('first-light'));
@@ -187,7 +201,7 @@ const SHOTS = {
   title(api) {
     api.showTitle();
     api.game.time = 22;
-    api.rig.orbitYaw = 2.6;
+    api.rig.orbitYaw = 0.25;
     for (let i = 0; i < 40; i++) api.simulate(0.05, { pitch: 0, roll: 0, yaw: 0, throttleDelta: 0, throttleNotches: 0, brakes: 0, flapStep: 0, analog: false }, true);
   },
 };

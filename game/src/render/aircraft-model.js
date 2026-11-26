@@ -95,6 +95,37 @@ function wingStation(sign, x) {
 }
 
 const tailStation = (x, chord, le) => ({ x, y: 0.24, chord, le, thick: 0.08 });
+
+/** Block glyphs on a 3x5 grid: rectangles [u0, v0, u1, v1], v growing toward the leading edge. */
+const GLYPHS = {
+  S: [[0, 4, 3, 5], [0, 2, 3, 3], [0, 0, 3, 1], [0, 2, 1, 5], [2, 0, 3, 3]],
+  K: [[0, 0, 1, 5], [1, 2, 2, 3], [2, 3, 3, 5], [2, 0, 3, 2]],
+  R: [[0, 0, 1, 5], [0, 4, 3, 5], [0, 2, 3, 3], [2, 2, 3, 5], [1.6, 0, 2.6, 2]],
+  W: [[0, 0, 1, 5], [3, 0, 4, 5], [1.5, 0, 2.5, 3], [0, 0, 4, 1]],
+  D: [[0, 0, 1, 5], [0, 4, 2.2, 5], [0, 0, 2.2, 1], [2, 1, 3, 4]],
+  '-': [[0, 2, 2, 3]],
+};
+
+/** The registration painted on top of the right wing, following the airfoil's upper surface. */
+function paintRegistration(b, text) {
+  const ink = [0.05, 0.3, 0.34, GLOSS];
+  const cell = 0.075;
+  let x = 0.64;
+  for (const ch of text) {
+    for (const [u0, v0, u1, v1] of GLYPHS[ch] ?? []) {
+      const corner = (u, v) => {
+        const px = x + u * cell;
+        const s = wingStation(1, px);
+        const z = s.le + s.chord * 0.71 - v * cell;
+        const t = (z - s.le) / s.chord;
+        const lift = t < 0.3 ? (t / 0.3) * 0.62 : 0.62 - ((t - 0.3) / 0.44) * 0.4;
+        return [px, s.y + s.thick * lift + 0.012, z];
+      };
+      b.polygon([corner(u0, v0), corner(u1, v0), corner(u1, v1), corner(u0, v1)].reverse(), ink);
+    }
+    x += ((GLYPHS[ch]?.reduce((m, r) => Math.max(m, r[2]), 0) ?? 2) + 1.2) * cell;
+  }
+}
 const finStation = (h, chord, le) => ({ x: -h, y: 0, chord, le, thick: 0.08 });
 
 function addWheel(b, hub, radius, width) {
@@ -137,9 +168,9 @@ export function buildAircraftParts() {
     { z: 0.3, width: 0.9, top: 0.42, bottom: 0.02, y: 0.48 },
     { z: 1.15, width: 0.5, top: 0.05, bottom: 0.02, y: 0.45 },
   ], 16, () => GLASS_TINT);
-  cabin.blob([-0.26, 0.78, -0.55], [0.13, 0.15, 0.14], [0.86, 0.66, 0.5, MATTE]);
-  cabin.blob([-0.26, 0.86, -0.56], [0.15, 0.1, 0.15], [0.2, 0.22, 0.26, MATTE]);
-  cabin.blob([0.26, 0.78, -0.35], [0.13, 0.15, 0.14], [0.86, 0.66, 0.5, MATTE]);
+  cabin.blob([-0.2, 0.76, -0.55], [0.12, 0.14, 0.13], [0.86, 0.66, 0.5, MATTE]);
+  cabin.blob([-0.2, 0.84, -0.56], [0.13, 0.09, 0.14], [0.2, 0.22, 0.26, MATTE]);
+  cabin.blob([0.2, 0.76, -0.35], [0.12, 0.14, 0.13], [0.86, 0.66, 0.5, MATTE]);
   for (const sign of [-1, 1]) {
     wingPanel(body, wingStation(sign, 0.5), wingStation(sign, 2.55), CREAM);
     wingPanel(body, wingStation(sign, 2.55), wingStation(sign, 2.75), CREAM, 1.0);
@@ -148,6 +179,7 @@ export function buildAircraftParts() {
     wingPanel(body, tailStation(sign * 0.12, 0.95, 3.12), tailStation(sign * 1.65, 0.6, 3.38), CREAM, 0.58);
   }
   body.withFrame(FIN_FRAME, FIN_OFFSET, () => wingPanel(body, finStation(0, 1.25, 2.85), finStation(1.35, 0.68, 3.42), TEAL, 0.6));
+  paintRegistration(body, 'SK-RWD');
   for (const sign of [-1, 1]) {
     body.polygon([[sign * 0.42, -0.5, 0.05], [sign * 1.33, -1.22, 0.12], [sign * 1.33, -1.22, 0.26], [sign * 0.42, -0.5, 0.3]], METAL);
     addWheel(body, [sign * 1.35, -1.25, 0.18], 0.3, 0.16);

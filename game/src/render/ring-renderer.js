@@ -21,7 +21,7 @@ export function createRingRenderer(gl, program) {
           return;
         }
         if (i === nextIndex) {
-          drawMesh(gl, program, hoop, { model, tint: [1, 0.78, 0.25], emissive: [1.4 * pulse, 0.75 * pulse, 0.12] });
+          drawMesh(gl, program, hoop, { model, tint: [1, 0.74, 0.22], emissive: [0.75 * pulse, 0.36 * pulse, 0.05] });
           drawMesh(gl, program, inner, { model, tint: [1, 1, 1], emissive: [0.9, 0.7, 0.3] });
         } else if (i < nextIndex + 4) {
           drawMesh(gl, program, hoop, { model, tint: [0.85, 0.92, 1], emissive: [0.25, 0.32, 0.45] });

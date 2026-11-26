@@ -28,7 +28,13 @@ vec2 terrainLight(vec3 p) {
   if (uUseTerrainLight < 0.5) return vec2(0.0);
   return texture(uTerrainLight, (p.xz + uTerrainMap.x) / uTerrainMap.y).rg;
 }
-vec3 toDisplay(vec3 c) { c = vec3(1.0) - exp(-c * uExposure); return sqrt(c); }
+vec3 toDisplay(vec3 c) {
+  c = sqrt(vec3(1.0) - exp(-c * uExposure));
+  vec3 curved = c * c * (3.0 - 2.0 * c);
+  c = mix(c, curved, 0.28);
+  float grey = dot(c, vec3(0.299, 0.587, 0.114));
+  return mix(vec3(grey), c, 1.08);
+}
 
 vec3 skyRadiance(vec3 dir) {
   float up = clamp(dir.y, -1.0, 1.0);
@@ -403,7 +409,8 @@ void main() {
   float light = mix(0.55, 1.15, clamp(vShade.x + (vUv.y - 0.5) * 0.5, 0.0, 1.0));
   vec3 color = (uSkyAmbient * 1.15 + uSunColor * 0.85 * light) * mix(1.0, 0.7, uCloudiness) * mix(1.0, 0.62, smoothstep(0.6, 0.9, uCloudiness));
   color = applyFog(color, vWorld);
-  outColor = vec4(toDisplay(color), puff.a * vShade.y);
+  float near = smoothstep(80.0, 320.0, length(vWorld - uCameraPos));
+  outColor = vec4(toDisplay(color), puff.a * vShade.y * near);
 }`;
 
 export const SURFACE_VERTEX = `${HEADER}
