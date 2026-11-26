@@ -19,7 +19,7 @@ function describeWind(w) {
 
 function describeStep(step) {
   if (step.type === 'takeoff') return 'Take off from the runway';
-  if (step.type === 'rings') return { harbour: 'Fly the seven harbour rings', silverrun: 'Fly the twelve Silverrun gates', lantern: 'Fly the seven lantern rings' }[step.course];
+  if (step.type === 'rings') return { harbour: 'Fly the seven harbour rings', silverrun: 'Fly the ten Silverrun gates', lantern: 'Fly the seven lantern rings' }[step.course];
   if (step.type === 'fly-to') return 'Navigate to Ostmere Strip';
   if (step.type === 'land') return `Land at ${step.airfield === 'ostmere' ? 'Ostmere Strip' : 'Halloway Field'} and stop on the runway`;
   return 'Explore, then land anywhere to log the flight';

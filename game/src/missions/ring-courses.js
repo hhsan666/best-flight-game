@@ -40,7 +40,7 @@ export function buildRingCourse(name, world) {
   }
   if (name === 'silverrun') {
     const river = world.terrain.river;
-    const picks = [118, 106, 95, 84, 74, 64, 54, 44, 34, 24, 14, 4];
+    const picks = [118, 106, 95, 84, 74, 64, 54, 44, 34, 24];
     const pts = picks.map((k, i) => {
       const p = river[Math.min(river.length - 1, k)];
       return [p.x, Math.max(p.surface, 0) + 38 + i * 6, p.z, 15];

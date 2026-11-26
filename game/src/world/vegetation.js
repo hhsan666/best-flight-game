@@ -27,7 +27,7 @@ function riverClearance(terrain, x, z) {
   const course = terrain.river;
   let best = Infinity;
   for (let k = 0; k < course.length; k += 3) best = Math.min(best, Math.hypot(x - course[k].x, z - course[k].z) - course[k].halfWidth);
-  return smoothstep(18, 70, best);
+  return smoothstep(8, 40, best);
 }
 
 /** Forest density in [0, 1] at a point: patches on mid-slopes, thinning with height and steepness. */
@@ -38,7 +38,7 @@ export function createForestField(terrain, seed) {
     if (h < 3.5 || h > 780) return 0;
     const slope = terrain.slopeAt(x, z);
     const patches = fractalNoise(noise, x / 1100, z / 1100, 4) * 0.5 + 0.5;
-    let density = smoothstep(0.45, 0.59, patches + smoothstep(120, 480, h) * 0.12);
+    let density = smoothstep(0.42, 0.56, patches + smoothstep(120, 480, h) * 0.12) * 0.85 + 0.15 * smoothstep(0.3, 0.42, patches);
     density *= 1 - smoothstep(560, 780, h);
     density *= 1 - smoothstep(0.75, 1.1, slope);
     density *= smoothstep(3.5, 9, h);

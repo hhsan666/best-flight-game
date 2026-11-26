@@ -26,7 +26,7 @@ const PRESETS = {
     label: 'Golden hour',
     sun: [150, 17], sunColor: [1.0, 0.76, 0.48], sunPower: 2.8,
     zenith: [0.25, 0.44, 0.78], horizon: [0.98, 0.82, 0.64], fog: [0.88, 0.78, 0.68],
-    groundAmbient: [0.34, 0.3, 0.25], fogDensity: 0.00011, fogFalloff: 0.0012, exposure: 1.55, night: 0, clouds: 0.55,
+    groundAmbient: [0.34, 0.3, 0.25], fogDensity: 0.00011, fogFalloff: 0.0012, exposure: 1.55, night: 0, clouds: 0.75,
   },
   dusk: {
     label: 'Dusk',

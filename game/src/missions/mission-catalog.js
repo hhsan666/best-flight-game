@@ -16,7 +16,7 @@ export const MISSIONS = [
   {
     id: 'silverrun-gates',
     title: 'Silverrun Gates',
-    tagline: 'Twelve gates up the river canyon, against the clock',
+    tagline: 'Ten gates up the river canyon, against the clock',
     brief: 'Race the Silverrun from its mouth to the Cairnhold foothills. The gates follow the river through every bend and climb with the valley. Carry speed, keep the turns tight, and do not touch the slopes.',
     sky: 'golden', wind: { from: 200, knots: 4, gust: 3 }, fuel: 0.3,
     start: { air: { x: 2300, z: 4300, altitude: 130, heading: 320, speed: 52 } },

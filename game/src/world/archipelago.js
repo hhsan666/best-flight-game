@@ -85,7 +85,7 @@ function carveRiver(heights, course, sample) {
     lowest = Math.min(lowest, ground);
     const profile = lerp(spring - 18, -0.35, Math.pow(point.s, 0.75));
     point.surface = Math.max(-0.35, Math.min(profile, lowest - 5));
-    point.halfWidth = lerp(5, 30, Math.pow(point.s, 0.8));
+    point.halfWidth = lerp(4, 18, Math.pow(point.s, 0.8));
   }
   for (let k = 0; k < course.length - 1; k++) {
     const a = course[k];

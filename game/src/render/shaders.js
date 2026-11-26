@@ -139,6 +139,10 @@ vec3 terrainAlbedo(vec3 p, vec3 n, vec4 s) {
   c = mix(c, sand, beach * (1.0 - s.z * 0.8));
   c = mix(c, vec3(0.56, 0.53, 0.41), 1.0 - smoothstep(-5.0, 0.2, p.y));
   c = mix(c, c * 0.72, s.w);
+  float tufts = valueNoise(p.xz * 0.23) * 0.6 + valueNoise(p.xz * 1.7) * 0.4;
+  float grassy = (1.0 - rockiness) * (1.0 - snowy) * (1.0 - beach) * smoothstep(0.0, 3.0, p.y);
+  c *= mix(1.0, 0.78 + 0.34 * tufts, grassy);
+  c *= 0.86 + 0.14 * smoothstep(0.0, 0.25, n.y - 0.75) + 0.1 * (n1 - 0.5);
   return c * (0.92 + 0.16 * n3);
 }
 void main() {
@@ -173,7 +177,7 @@ vec3 waveNormal(vec2 p, float t, float dist) {
   float speeds[4] = float[4](0.8, 1.2, 1.7, 2.3);
   for (int i = 0; i < 4; i++) {
     float wavelength = 6.2832 / freqs[i];
-    float fade = 1.0 - smoothstep(wavelength * 4.0, wavelength * 14.0, dist);
+    float fade = 1.0 - smoothstep(wavelength * 2.5, wavelength * 9.0, dist);
     float phase = dot(p, dirs[i]) * freqs[i] + t * speeds[i];
     g += dirs[i] * cos(phase) * freqs[i] * (1.4 / (float(i) + 1.0)) * fade;
   }
@@ -194,14 +198,15 @@ void main() {
   float dist = length(toCamera);
   vec3 v = toCamera / dist;
   vec3 n = waveNormal(vWorld.xz, uTime, dist);
-  vec3 shallow = uFlow > 0.5 ? toLinear(vec3(0.16, 0.42, 0.42)) : toLinear(vec3(0.22, 0.70, 0.67));
-  vec3 deep = uFlow > 0.5 ? toLinear(vec3(0.05, 0.2, 0.24)) : toLinear(vec3(0.03, 0.19, 0.33));
+  vec3 shallow = uFlow > 0.5 ? toLinear(vec3(0.3, 0.62, 0.6)) : toLinear(vec3(0.22, 0.70, 0.67));
+  vec3 deep = uFlow > 0.5 ? toLinear(vec3(0.12, 0.38, 0.45)) : toLinear(vec3(0.03, 0.19, 0.33));
   vec3 body = mix(shallow, deep, smoothstep(0.5, uFlow > 0.5 ? 4.0 : 30.0, depth));
   vec3 lit = body * (uSkyAmbient * 0.95 + uSunColor * max(uSunDir.y, 0.05) * 0.6);
   float fresnel = 0.02 + 0.98 * pow(1.0 - max(dot(n, v), 0.0), 5.0);
   vec3 r = reflect(-v, n);
   r.y = abs(r.y);
-  vec3 color = mix(lit, skyRadiance(r), fresnel * mix(0.9, 0.55, smoothstep(800.0, 6000.0, dist)));
+  vec3 color = mix(lit, skyRadiance(r), fresnel * mix(0.9, 0.55, smoothstep(800.0, 6000.0, dist)) * (uFlow > 0.5 ? 0.6 : 1.0));
+  if (uFlow > 0.5) color *= 0.85 + 0.3 * valueNoise(vWorld.xz * vec2(0.08, 0.3) + uTime * 0.6);
   color += uSunColor * pow(max(dot(r, uSunDir), 0.0), 700.0) * 10.0;
   float foamBand = 1.0 - smoothstep(0.0, 2.4, depth);
   float foam = foamBand * smoothstep(0.45, 0.8, valueNoise(vWorld.xz * 0.16 + uTime * 0.25) * 0.55 + 0.45 * sin(depth * 4.5 - uTime * 1.5));

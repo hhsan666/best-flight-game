@@ -57,8 +57,8 @@ export function createCameraRig() {
       const ease = 1 - Math.exp(-dt * 3.2);
       rig.lookDir = normalize(mix(rig.lookDir, wanted, ease));
       rig.upDir = normalize(mix(rig.upDir, normalize(mix([0, 1, 0], planeUp, 0.4)), 1 - Math.exp(-dt * 2.5)));
-      eye = add(sub(plane.position, scale(rig.lookDir, 13.5)), scale(rig.upDir, 3.4));
-      target = add(plane.position, add(scale(rig.lookDir, 26), scale(rig.upDir, 1.6)));
+      eye = add(sub(plane.position, scale(rig.lookDir, 11)), scale(rig.upDir, 2.9));
+      target = add(plane.position, add(scale(rig.lookDir, 26), scale(rig.upDir, 1.9)));
       up = rig.upDir;
     }
     const ground = Math.max(terrain.heightAt(eye[0], eye[2]), 0) + 1.6;

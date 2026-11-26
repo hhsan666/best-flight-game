@@ -5,7 +5,8 @@ import { WATER_VERTEX, WATER_FRAGMENT } from './shaders.js';
 
 const SEA_REACH = 45000;
 
-function riverRibbon(course) {
+function riverRibbon(fullCourse) {
+  const course = fullCourse.filter((p) => p.s > 0.16);
   const positions = [];
   const indices = [];
   for (let k = 0; k < course.length; k++) {
