@@ -15,9 +15,9 @@ const { chromium } = require('playwright');
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const gameRoot = join(root, 'game');
 const SHOTS = [
-  { file: '1-cover.jpg', scene: 'cover' },
+  { file: '1-cover.jpg', scene: 'coast' },
   { file: '2-cockpit-dusk.jpg', scene: 'cockpit' },
-  { file: '3-final-approach.jpg', scene: 'approach' },
+  { file: '3-squall-final.jpg', scene: 'squall' },
   { file: '4-results.jpg', scene: 'results' },
 ];
 const MAX_BYTES = 262144;

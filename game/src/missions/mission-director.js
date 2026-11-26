@@ -90,8 +90,8 @@ export function createMissionDirector(world, mission) {
     if (st.nextRing >= st.rings.length) advance();
   }
 
-  function checkLanding(plane, readout, step, dt) {
-    if (plane.onGround && !st.touchdown && st.airborneTime > 2) {
+  function checkLanding(plane, readout, step, dt, airborneBefore) {
+    if (plane.onGround && !st.touchdown && airborneBefore > 2) {
       const facts = measureTouchdown(plane, readout);
       if (facts && (facts.field.id === step.airfield || step.type === 'explore')) {
         st.touchdown = facts;
@@ -116,6 +116,7 @@ export function createMissionDirector(world, mission) {
     update(plane, readout, events, dt) {
       if (st.status !== 'flying') return;
       st.elapsed += dt;
+      const airborneBefore = st.airborneTime;
       st.airborneTime = plane.onGround ? 0 : st.airborneTime + dt;
       plane.airborneFor = st.airborneTime;
       for (const m of st.messages) m.life -= dt;
@@ -137,7 +138,7 @@ export function createMissionDirector(world, mission) {
           say(`${f.name.toUpperCase()} IN SIGHT — LAND`, '#ffc23a', true, 4);
           advance();
         }
-      } else if (step.type === 'land' || step.type === 'explore') checkLanding(plane, readout, step, dt);
+      } else if (step.type === 'land' || step.type === 'explore') checkLanding(plane, readout, step, dt, airborneBefore);
       const edge = Math.max(Math.abs(plane.position[0]), Math.abs(plane.position[2])) - world.terrain.half;
       if (edge > 0 && !st.warned) {
         st.warned = true;

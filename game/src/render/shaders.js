@@ -18,8 +18,16 @@ uniform float uExposure;
 uniform float uTime;
 uniform vec4 uLandingLight;
 uniform vec3 uLandingDir;
+uniform sampler2D uTerrainLight;
+uniform vec2 uTerrainMap;
+uniform float uUseTerrainLight;
 
 vec3 toLinear(vec3 c) { return c * c; }
+
+vec2 terrainLight(vec3 p) {
+  if (uUseTerrainLight < 0.5) return vec2(0.0);
+  return texture(uTerrainLight, (p.xz + uTerrainMap.x) / uTerrainMap.y).rg;
+}
 vec3 toDisplay(vec3 c) { c = vec3(1.0) - exp(-c * uExposure); return sqrt(c); }
 
 vec3 skyRadiance(vec3 dir) {
@@ -48,8 +56,9 @@ vec3 applyFog(vec3 color, vec3 worldPos) {
 }
 
 vec3 litSurface(vec3 albedo, vec3 n, vec3 worldPos, float shine) {
-  float diffuse = max(dot(n, uSunDir), 0.0);
-  vec3 ambient = mix(uGroundAmbient, uSkyAmbient, n.y * 0.5 + 0.5);
+  vec2 tl = terrainLight(worldPos);
+  float diffuse = max(dot(n, uSunDir), 0.0) * (1.0 - tl.r * 0.86);
+  vec3 ambient = mix(uGroundAmbient, uSkyAmbient, n.y * 0.5 + 0.5) * (1.0 - tl.g * 0.45) * (1.0 + tl.r * 0.12);
   vec3 color = albedo * (ambient + uSunColor * diffuse);
   if (shine > 0.0) {
     vec3 v = normalize(uCameraPos - worldPos);
@@ -201,7 +210,8 @@ void main() {
   vec3 shallow = uFlow > 0.5 ? toLinear(vec3(0.3, 0.62, 0.6)) : toLinear(vec3(0.22, 0.70, 0.67));
   vec3 deep = uFlow > 0.5 ? toLinear(vec3(0.12, 0.38, 0.45)) : toLinear(vec3(0.03, 0.19, 0.33));
   vec3 body = mix(shallow, deep, smoothstep(0.5, uFlow > 0.5 ? 4.0 : 30.0, depth));
-  vec3 lit = body * (uSkyAmbient * 0.95 + uSunColor * max(uSunDir.y, 0.05) * 0.6);
+  vec2 tl = terrainLight(vWorld);
+  vec3 lit = body * (uSkyAmbient * 0.95 + uSunColor * max(uSunDir.y, 0.05) * 0.6 * (1.0 - tl.r * 0.8));
   float fresnel = 0.02 + 0.98 * pow(1.0 - max(dot(n, v), 0.0), 5.0);
   vec3 r = reflect(-v, n);
   r.y = abs(r.y);

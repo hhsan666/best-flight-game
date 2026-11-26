@@ -112,7 +112,7 @@ export function createSceneryRenderer(gl, program, world) {
       for (const set of wallSets) drawInstanceGroups(gl, program, set, frame);
       for (const set of roofSets) drawInstanceGroups(gl, program, set, frame);
       drawInstanceGroups(gl, program, flatRoofSet, frame);
-      drawMesh(gl, program, landmarks);
+      drawMesh(gl, program, landmarks, { grounded: true });
     },
   };
 }

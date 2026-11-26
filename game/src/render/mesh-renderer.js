@@ -38,8 +38,9 @@ export function beginMeshPass(gl, program, frame) {
   setAtmosphereUniforms(gl, program, frame);
 }
 
-export function drawMesh(gl, program, mesh, { model = IDENTITY, tint = WHITE, emissive = NONE, alpha = 1 } = {}) {
+export function drawMesh(gl, program, mesh, { model = IDENTITY, tint = WHITE, emissive = NONE, alpha = 1, grounded = false } = {}) {
   gl.uniform1f(program.u.uInstanced, 0);
+  if (program.u.uUseTerrainLight) gl.uniform1f(program.u.uUseTerrainLight, grounded ? 1 : 0);
   gl.uniformMatrix4fv(program.u.uModel, false, model);
   gl.uniform3fv(program.u.uTint, tint);
   gl.uniform3fv(program.u.uEmissive, emissive);
@@ -102,6 +103,7 @@ export function createInstanceGroups(gl, mesh, instances, cell, reach) {
 
 export function drawInstanceGroups(gl, program, set, frame, tint = WHITE) {
   gl.uniform1f(program.u.uInstanced, 1);
+  if (program.u.uUseTerrainLight) gl.uniform1f(program.u.uUseTerrainLight, 1);
   gl.uniform3fv(program.u.uTint, tint);
   gl.uniform3fv(program.u.uEmissive, NONE);
   gl.uniform1f(program.u.uAlpha, 1);

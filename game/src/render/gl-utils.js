@@ -120,4 +120,12 @@ export function setAtmosphereUniforms(gl, p, frame) {
   if (p.u.uTime) gl.uniform1f(p.u.uTime, frame.time);
   if (p.u.uLandingLight) gl.uniform4fv(p.u.uLandingLight, frame.landingLight);
   if (p.u.uLandingDir) gl.uniform3fv(p.u.uLandingDir, frame.landingDirection);
+  if (p.u.uTerrainLight && frame.terrainLight) {
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, frame.terrainLight.texture);
+    gl.uniform1i(p.u.uTerrainLight, 3);
+    gl.uniform2f(p.u.uTerrainMap, frame.terrainLight.half, frame.terrainLight.size);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+  if (p.u.uUseTerrainLight) gl.uniform1f(p.u.uUseTerrainLight, frame.terrainLight ? 1 : 0);
 }

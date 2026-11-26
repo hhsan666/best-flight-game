@@ -238,6 +238,35 @@ export function createFlightHud(canvas, minimap) {
     ctx.restore();
   }
 
+  /** From the cockpit: the windscreen frame and canopy rails around the view. */
+  function canopyFrame() {
+    ctx.save();
+    const frame = (points) => {
+      const g = ctx.createLinearGradient(0, 0, W, 0);
+      g.addColorStop(0, '#1b1e22');
+      g.addColorStop(0.5, '#2b3036');
+      g.addColorStop(1, '#1b1e22');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(points[0][0], points[0][1]);
+      for (const p of points.slice(1)) ctx.lineTo(p[0], p[1]);
+      ctx.closePath();
+      ctx.fill();
+    };
+    frame([[0, H * 0.78], [W * 0.09, 0], [W * 0.125, 0], [W * 0.03, H * 0.8]]);
+    frame([[W, H * 0.78], [W * 0.91, 0], [W * 0.875, 0], [W * 0.97, H * 0.8]]);
+    frame([[0, 0], [W, 0], [W, H * 0.035], [W * 0.5, H * 0.055], [0, H * 0.035]]);
+    ctx.strokeStyle = 'rgba(255,220,170,0.18)';
+    ctx.lineWidth = 1.5 * u;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.03, H * 0.8);
+    ctx.lineTo(W * 0.125, 0);
+    ctx.moveTo(W * 0.97, H * 0.8);
+    ctx.lineTo(W * 0.875, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function missionPanel(m) {
     if (!m) return;
     const x = 22 * u;
@@ -299,6 +328,7 @@ export function createFlightHud(canvas, minimap) {
       ctx.clearRect(0, 0, W, H);
       const { plane, readout } = view;
       const kt = readout.airspeed * KNOTS;
+      if (view.cockpit) canopyFrame();
       flightPathMarker(view.camera, plane);
       targetMarker(view.camera, view.target);
       speedTape(kt);

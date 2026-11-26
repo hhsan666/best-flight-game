@@ -7,6 +7,7 @@ import { quatFromAttitude, quatRotate } from '../core/vector-math.js';
 import { AIRFIELDS, runwayEnds } from '../world/landmarks.js';
 import { SALTRUNNER } from '../flight/aircraft-spec.js';
 import { gradeLanding } from '../missions/landing-grader.js';
+import { buildRingCourse } from '../missions/ring-courses.js';
 
 const DEG = Math.PI / 180;
 
@@ -44,8 +45,8 @@ function settleChase(api) {
 }
 
 const SHOTS = {
-  /** Cover: chasing the Saltrunner up the Silverrun canyon toward the snowy Cairnhold, a gate ahead. */
-  cover(api) {
+  /** Chasing the Saltrunner up the Silverrun canyon toward the snowy Cairnhold, a gate ahead. */
+  canyon(api) {
     api.startMission(missionById('silverrun-gates'));
     const st = api.game.director.state;
     st.nextRing = 4;
@@ -54,6 +55,22 @@ const SHOTS = {
     const at = approachTo(st.rings, 4, 210, 6);
     pose(api.game.plane, at, headingBetween(at, st.rings[4].position) - 4, 3, 14, 54, 0.82, 0);
     api.game.time = 37.5;
+    api.rig.mode = 'chase';
+    api.rig.reset(api.game.plane);
+    settleChase(api);
+  },
+  /** Cover. First Light along the harbour coast: beach, shallows, forest and the Cairnhold peaks, ring 5 ahead. */
+  coast(api) {
+    api.startMission(missionById('first-light'));
+    const st = api.game.director.state;
+    st.step = 1;
+    st.rings = buildRingCourse('harbour', api.world);
+    st.nextRing = 4;
+    st.cleared = 4;
+    st.elapsed = 162;
+    const at = approachTo(st.rings, 4, 250, 6);
+    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) - 4, 3, 12, 52, 0.72, 0);
+    api.game.time = 51.5;
     api.rig.mode = 'chase';
     api.rig.reset(api.game.plane);
     settleChase(api);
@@ -94,6 +111,27 @@ const SHOTS = {
     const right = [Math.cos(h), 0, Math.sin(h)];
     const eye = [0, 1, 2].map((i) => plane.position[i] - forward[i] * 15 - right[i] * 3 + (i === 1 ? 4.6 : 0));
     const target = [low.x + forward[0] * 230, field.elevation + 4, low.z + forward[2] * 230];
+    api.rig.override = { eye, target, up: [0, 1, 0], fov: 56 };
+  },
+  /** Squall Final: crabbing into the crosswind on short final to runway 25, flaps out, lights on. */
+  squall(api) {
+    api.startMission(missionById('squall-final'));
+    const st = api.game.director.state;
+    st.elapsed = 96;
+    const field = AIRFIELDS[0];
+    const end = runwayEnds(field)[1];
+    const h = end.heading * DEG;
+    const d = 280;
+    const at = [end.x - Math.sin(h) * d + Math.cos(h) * 4, field.elevation + (300 + d) * Math.tan(3 * DEG) + 1.5, end.z + Math.cos(h) * d + Math.sin(h) * 4];
+    const plane = api.game.plane;
+    pose(plane, at, end.heading + 9, 1.5, 4, 34, 0.3, 2);
+    plane.velocity[1] = -1.8;
+    api.game.time = 26.6;
+    const forward = [Math.sin(h), 0, -Math.cos(h)];
+    const right = [Math.cos(h), 0, Math.sin(h)];
+    const eye = [0, 1, 2].map((i) => plane.position[i] - forward[i] * 15 + right[i] * 3 + (i === 1 ? 4.6 : 0));
+    const target = [end.x + forward[0] * 230, field.elevation + 4, end.z + forward[2] * 230];
+    api.rig.mode = 'chase';
     api.rig.override = { eye, target, up: [0, 1, 0], fov: 56 };
   },
   /** The results card after a First Light landing on Halloway Field at golden hour. */
@@ -138,7 +176,7 @@ const SHOTS = {
 export const SHOT_NAMES = Object.keys(SHOTS);
 
 export function stageShot(name, api) {
-  (SHOTS[name] ?? SHOTS.cover)(api);
+  (SHOTS[name] ?? SHOTS.coast)(api);
   const plane = api.game.plane;
   const readout = flightReadout(plane, api.world.terrain);
   const draw = () => api.renderFrame(0, api.game.mode === 'flying' ? readout : null);

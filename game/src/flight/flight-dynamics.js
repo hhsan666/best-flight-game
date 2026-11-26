@@ -128,7 +128,14 @@ export function stepAircraft(plane, world, wind, dt = PHYSICS_STEP) {
   const gearTorqueBody = quatRotate(quatConjugate(plane.orientation), gear.torque);
   const inertia = [spec.pitch.inertia, spec.yaw.inertia, spec.roll.inertia];
   for (let i = 0; i < 3; i++) plane.angularVelocity[i] += (aero.angularAcceleration[i] + gearTorqueBody[i] / inertia[i]) * dt;
-  if (gear.contacts.length > 0) for (let i = 0; i < 3; i++) plane.angularVelocity[i] *= 1 - Math.min(1, dt * 1.5);
+  if (gear.contacts.length > 0) {
+    for (let i = 0; i < 3; i++) plane.angularVelocity[i] *= 1 - Math.min(1, dt * 1.5);
+    // The gear's track and a pilot's hands keep a rolling aircraft upright: a righting moment
+    // grows with bank (and with a nose pitched onto its wheel), so crosswinds skid, not capsize.
+    const att = attitudeOf(plane.orientation);
+    plane.angularVelocity[2] += (att.bank * 9 - plane.angularVelocity[2] * 4) * dt;
+    if (att.pitch < -0.08) plane.angularVelocity[0] += (-att.pitch - 0.08) * 8 * dt;
+  }
   plane.orientation = quatIntegrateBody(plane.orientation, plane.angularVelocity, dt);
 
   const up = quatRotate(plane.orientation, [0, 1, 0]);
@@ -159,6 +166,10 @@ export function applyPilotInput(plane, input, assist, dt) {
     if (plane.holdBank === null || plane.holdBank === undefined) plane.holdBank = Math.abs(bank) < 0.09 ? 0 : clamp(bank, -1.05, 1.05);
     roll += clamp((plane.holdBank - bank) * 1.4 + plane.angularVelocity[2] * 0.35, -0.6, 0.6);
   } else plane.holdBank = null;
+  if (assist && plane.onGround && Math.abs(input.roll) < 0.02) {
+    // On the ground the assist holds the wings level, the aileron a pilot would hold into a crosswind.
+    roll += clamp(-attitudeOf(plane.orientation).bank * 4 + plane.angularVelocity[2] * 0.8, -1, 1);
+  }
   c.roll = clamp(roll, -1, 1);
   c.yaw = clamp(ease(plane.yawPedal ?? 0, input.yaw, 3) + (assist && airborne ? clamp(plane.beta * 4, -0.5, 0.5) : 0), -1, 1);
   plane.yawPedal = ease(plane.yawPedal ?? 0, input.yaw, 3);

@@ -12,6 +12,7 @@ import { createAircraftRenderer } from './aircraft-renderer.js';
 import { createAircraftShadow } from './aircraft-shadow.js';
 import { createCloudRenderer } from './cloud-renderer.js';
 import { createSpriteBatch } from './sprite-batch.js';
+import { createTerrainLighting } from './terrain-lighting.js';
 import { LIGHTHOUSE } from '../world/landmarks.js';
 
 export function createSceneRenderer(canvas, world) {
@@ -27,6 +28,7 @@ export function createSceneRenderer(canvas, world) {
   const shadow = createAircraftShadow(gl, world.terrain);
   const clouds = createCloudRenderer(gl, world.seed, world.terrain.size);
   const sprites = createSpriteBatch(gl);
+  const lighting = createTerrainLighting(gl, world.terrain);
   const lighthouseLamp = [LIGHTHOUSE.x, world.terrain.heightAt(LIGHTHOUSE.x, LIGHTHOUSE.z) + 35.5, LIGHTHOUSE.z];
 
   return {
@@ -35,6 +37,7 @@ export function createSceneRenderer(canvas, world) {
     /** scene: { plane, rings, nextRing, particles, showAircraft, pilotEye } */
     render(frame, scene) {
       const { atmosphere } = frame;
+      frame.terrainLight = lighting.update(atmosphere.sunDirection);
       clouds.setCover(atmosphere.clouds);
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 0, 1);
