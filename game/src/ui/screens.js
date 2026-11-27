@@ -97,6 +97,7 @@ export function createScreens(root, onAction) {
         <h3>How to fly</h3><h2>Saltrunner SR-2</h2>
         <table class="controls-table">${CONTROL_HELP.map(([k, d]) => `<tr><td>${escape(k)}</td><td>${escape(d)}</td></tr>`).join('')}</table>
         <p>Rotate at 55 kt. Cruise at 100 kt with about 65% throttle. Stall comes at 50 kt clean, 44 kt with full flaps. On final, fly 60–65 kt with full flaps and keep two white and two red lights on the PAPI beside the runway. Flare gently: under 380 ft/min is a smooth landing.</p>
+        <p>The sortie card shows each step, your score and the par time; a ring threaded near its centre scores more. FUEL is how long the tank lasts at this throttle and NEED is how long the rest of the route takes at this ground speed: keep NEED green, and ease the throttle back if it turns amber or red. The arrow beside the heading shows where the wind is blowing.</p>
         <div class="actions"><button class="primary" data-action="${back}">BACK</button></div>
       </div></div>`);
     },
