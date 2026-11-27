@@ -238,7 +238,7 @@ function renderFrame(dt, readout) {
   const camera = rig.update(plane, world.terrain, dt, { width: view.width, height: view.height });
   const forward = quatRotate(plane.orientation, [0, -0.08, -1]);
   const frame = {
-    time: game.time, camera, atmosphere: game.atmosphere,
+    time: game.time, camera, atmosphere: game.atmosphere, wind: windAt(plane, game.mission, game.time),
     landingLight: plane.landingLight ? [...add(plane.position, forward), 1] : [0, 0, 0, 0], landingDirection: forward,
   };
   const director = game.director;

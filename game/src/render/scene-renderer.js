@@ -13,6 +13,7 @@ import { createAircraftShadow } from './aircraft-shadow.js';
 import { createCloudRenderer } from './cloud-renderer.js';
 import { createSpriteBatch } from './sprite-batch.js';
 import { createTerrainLighting } from './terrain-lighting.js';
+import { createWindsockRenderer } from './windsock-renderer.js';
 import { LIGHTHOUSE } from '../world/landmarks.js';
 
 export function createSceneRenderer(canvas, world) {
@@ -24,6 +25,7 @@ export function createSceneRenderer(canvas, world) {
   const scenery = createSceneryRenderer(gl, meshProgram, world);
   const runways = createRunwayRenderer(gl, world.airfields, world.terrain);
   const rings = createRingRenderer(gl, meshProgram);
+  const windsocks = createWindsockRenderer(gl, meshProgram, world.airfields, world.terrain);
   const aircraft = createAircraftRenderer(gl, meshProgram);
   const shadow = createAircraftShadow(gl, world.terrain);
   const clouds = createCloudRenderer(gl, world.seed, world.terrain.size);
@@ -50,6 +52,7 @@ export function createSceneRenderer(canvas, world) {
       runways.draw(frame);
       beginMeshPass(gl, meshProgram, frame);
       scenery.draw(frame);
+      windsocks.draw(frame, frame.wind);
       rings.draw(frame, scene.rings, scene.nextRing);
       if (scene.showAircraft) aircraft.draw(frame, scene.plane, scene.cockpit);
       water.draw(frame);
