@@ -93,3 +93,8 @@ kbd { font-family: var(--mono); font-size: 0.85em; padding: 0.05em 0.45em; borde
 .score-total span:last-child { font-family: var(--mono); font-size: 3.6vh; color: var(--amber); }
 .grade { font-family: var(--mono); font-size: 4vh; font-weight: 900; color: var(--teal); margin-left: auto; text-align: center; line-height: 1; }
 .grade small { display: block; font-family: var(--sans); font-size: 1.3vh; letter-spacing: 0.2em; color: var(--muted); }
+.landing-plot { display: block; width: 100%; height: auto; margin: 0.4vh 0 0.8vh; font-family: inherit; }
+.landing-plot text { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; }
+.landing-plot .plot-touchdown { fill: var(--amber); }
+.landing-plot .plot-zone { fill: #7ee8a6; }
+.landing-plot .plot-stop { fill: #dfe8e4; }

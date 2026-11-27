@@ -56,7 +56,7 @@ export function drawMesh(gl, program, mesh, { model = IDENTITY, tint = WHITE, em
  * Splits instances ({x, y, z, yaw, sx, sy, sz, seed}) into square areas of `cell` metres, each
  * with its own vertex array sharing the mesh's buffers, so whole areas can be culled at once.
  */
-export function createInstanceGroups(gl, mesh, instances, cell, reach) {
+export function createInstanceGroups(gl, mesh, instances, cell, reach, thinning = null) {
   const buckets = new Map();
   for (const it of instances) {
     const key = `${Math.floor(it.x / cell)},${Math.floor(it.z / cell)}`;
@@ -65,6 +65,9 @@ export function createInstanceGroups(gl, mesh, instances, cell, reach) {
   }
   const groups = [];
   for (const list of buckets.values()) {
+    // Shuffled by each instance's own seed, so drawing only the first part of a distant group still
+    // spreads what is drawn evenly over its cell.
+    if (thinning) list.sort((a, b) => a.seed - b.seed);
     const placement = new Float32Array(list.length * 4);
     const sizing = new Float32Array(list.length * 4);
     const min = [Infinity, Infinity, Infinity];
@@ -98,7 +101,7 @@ export function createInstanceGroups(gl, mesh, instances, cell, reach) {
     gl.bindVertexArray(null);
     groups.push({ vao, count: list.length, min, max, centre: [(min[0] + max[0]) / 2, (min[2] + max[2]) / 2] });
   }
-  return { mesh, groups, reach };
+  return { mesh, groups, reach, cell, thinning };
 }
 
 export function drawInstanceGroups(gl, program, set, frame, tint = WHITE) {
@@ -108,11 +111,19 @@ export function drawInstanceGroups(gl, program, set, frame, tint = WHITE) {
   gl.uniform3fv(program.u.uEmissive, NONE);
   gl.uniform1f(program.u.uAlpha, 1);
   const eye = frame.camera.position;
+  const thin = set.thinning;
   for (const group of set.groups) {
-    if (Math.hypot(group.centre[0] - eye[0], group.centre[1] - eye[2]) > set.reach) continue;
+    const distance = Math.hypot(group.centre[0] - eye[0], group.centre[1] - eye[2]);
+    if (distance > set.reach) continue;
     if (!boxInFrustum(frame.camera.planes, group.min, group.max)) continue;
+    let count = group.count;
+    if (thin) {
+      // Far groups draw a shrinking share of their instances: a few pixels each, the ground shading carries the rest.
+      const far = Math.max(0, distance - set.cell * 0.7 - thin.near) / Math.max(1, set.reach - thin.near);
+      count = Math.ceil(group.count * Math.max(thin.least, 1 - far * (1 - thin.least)));
+    }
     gl.bindVertexArray(group.vao);
-    gl.drawElementsInstanced(gl.TRIANGLES, set.mesh.count, set.mesh.indexType, 0, group.count);
+    gl.drawElementsInstanced(gl.TRIANGLES, set.mesh.count, set.mesh.indexType, 0, count);
   }
   gl.bindVertexArray(null);
 }

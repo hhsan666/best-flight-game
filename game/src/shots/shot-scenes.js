@@ -200,7 +200,7 @@ const SHOTS = {
     clearRings(st, [4.2, 2.6, 5.1, 3.4, 2.2, 3.8, 1.9]);
     st.rings.forEach((r) => (r.clearedAt = -99));
     Object.assign(st, { step: 3, missed: 0, elapsed: 247, status: 'complete' });
-    st.landing = gradeLanding({ sinkFpm: 186, centreline: 1.3, fromThreshold: 292, bank: 0.8 }, true);
+    st.landing = gradeLanding({ field, sinkFpm: 186, centreline: 1.3, offset: -1.3, fromThreshold: 292, bank: 0.8 }, true, 760);
     const plane = api.game.plane;
     pose(plane, [low.x + Math.sin(h) * 760, field.elevation + 1.53, low.z - Math.cos(h) * 760], low.heading + 12, 0.2, 0, 0, 0, 2);
     plane.onGround = true;

@@ -7,6 +7,26 @@ import { CONTROL_HELP } from '../input/pilot-input.js';
 const SKY_ICONS = { morning: '☀', noon: '☼', golden: '◐', storm: '☂', dusk: '☾' };
 const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
+/** A plan view of the runway: the touchdown zone, where the wheels met it (off-centre exaggerated) and where it stopped. */
+function landingPlot(p) {
+  const x = (m) => 12 + (Math.max(0, Math.min(p.length, m)) / p.length) * 376;
+  const y = (off) => 30 + Math.max(-1, Math.min(1, off / (p.width / 2))) * 9;
+  const td = x(p.touchdown);
+  const stop = p.stop === null || p.stop === undefined ? null : x(p.stop);
+  const side = Math.abs(p.offset) < 0.05 ? 'on' : p.offset < 0 ? 'left of' : 'right of';
+  const bars = [0, 1, 2, 3].map((i) => `<rect x="15" y="${21.5 + i * 5}" width="7" height="2.4" fill="#e9e8e2"/>`).join('');
+  return `<svg class="landing-plot" viewBox="0 0 400 58" role="img" aria-label="Touchdown ${Math.round(p.touchdown)} m past the threshold, ${Math.abs(p.offset).toFixed(1)} m ${side} the centreline${stop === null ? '' : `, stopped at ${Math.round(p.stop)} m`}">
+    <rect x="12" y="19" width="376" height="22" rx="2" fill="#2f3236" stroke="rgba(255,255,255,0.35)"/>
+    <rect x="${x(150).toFixed(1)}" y="19" width="${(x(450) - x(150)).toFixed(1)}" height="22" fill="rgba(70,224,122,0.25)"/>
+    <line x1="26" y1="30" x2="384" y2="30" stroke="rgba(255,255,255,0.65)" stroke-dasharray="7 6"/>${bars}
+    ${stop === null ? '' : `<line x1="${td.toFixed(1)}" y1="${y(p.offset).toFixed(1)}" x2="${stop.toFixed(1)}" y2="30" stroke="#ffc23a" stroke-width="1.6" stroke-dasharray="3 3"/><rect x="${(stop - 3.5).toFixed(1)}" y="26.5" width="7" height="7" fill="#ffffff"/>`}
+    <circle cx="${td.toFixed(1)}" cy="${y(p.offset).toFixed(1)}" r="5" fill="#ffc23a" stroke="#1a1206" stroke-width="1.2"/>
+    <text x="${Math.max(60, Math.min(340, td)).toFixed(1)}" y="12" text-anchor="middle" class="plot-touchdown">TOUCHDOWN ${Math.round(p.touchdown)} m</text>
+    <text x="${((x(150) + x(450)) / 2).toFixed(1)}" y="54" text-anchor="middle" class="plot-zone">ZONE</text>
+    ${stop === null ? '' : `<text x="${Math.max(40, Math.min(360, stop)).toFixed(1)}" y="54" text-anchor="middle" class="plot-stop">STOP ${Math.round(p.stop)} m</text>`}
+  </svg>`;
+}
+
 function medalBadge(medal, big = false) {
   if (!medal) return big ? '' : '<span class="medal"></span>';
   const letter = { gold: 'G', silver: 'S', bronze: 'B' }[medal];
@@ -98,7 +118,7 @@ export function createScreens(root, onAction) {
           <div><div class="sub">${escape(mission.title)}</div><h2>${failed ? 'MISSION FAILED' : 'MISSION COMPLETE'}</h2></div>
           ${card.grade ? `<div class="grade">${card.grade}<small>LANDING</small></div>` : ''}
         </div>
-        ${failed ? `<div class="reason">${escape(reason)}</div>` : `<table class="score-table">${rows}</table><div class="score-total"><span>Total${card.medal ? ` · ${card.medal} medal` : ''}</span><span>${card.total}</span></div>`}
+        ${failed ? `<div class="reason">${escape(reason)}</div>` : `${card.plot ? landingPlot(card.plot) : ''}<table class="score-table">${rows}</table><div class="score-total"><span>Total${card.medal ? ` · ${card.medal} medal` : ''}</span><span>${card.total}</span></div>`}
         <div class="actions"><button class="primary" data-action="restart">FLY AGAIN</button>${next ? `<button class="ghost" data-action="brief" data-mission="${next.id}">Next: ${escape(next.title)}</button>` : ''}<button class="ghost" data-action="title">Missions</button></div>
       </div></div>`);
     },

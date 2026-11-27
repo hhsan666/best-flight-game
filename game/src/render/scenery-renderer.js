@@ -88,9 +88,10 @@ export function createSceneryRenderer(gl, program, world) {
   const trees = world.forest.trees;
   const conifers = trees.filter((t) => t.conifer).map((t) => ({ x: t.x, y: t.y, z: t.z, yaw: t.yaw, sx: t.height * 0.62, sy: t.height, sz: t.height * 0.62, seed: t.seed }));
   const broadleaf = trees.filter((t) => !t.conifer).map((t) => ({ x: t.x, y: t.y, z: t.z, yaw: t.yaw, sx: t.height * 0.9, sy: t.height, sz: t.height * 0.9, seed: t.seed }));
+  const thinning = { near: 1600, least: 0.3 };
   const treeSets = [
-    createInstanceGroups(gl, uploadMesh(gl, coniferMesh()), conifers, 900, 7000),
-    createInstanceGroups(gl, uploadMesh(gl, broadleafMesh()), broadleaf, 900, 7000),
+    createInstanceGroups(gl, uploadMesh(gl, coniferMesh()), conifers, 900, 7000, thinning),
+    createInstanceGroups(gl, uploadMesh(gl, broadleafMesh()), broadleaf, 900, 7000, thinning),
   ];
   const houses = world.buildings.filter((b) => b.kind === 'house');
   const wallSets = WALL_PAINTS.map((paint, i) => {

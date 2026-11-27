@@ -11,17 +11,26 @@ export function measureTouchdown(plane, readout) {
   const { field, along, across } = under;
   const h = (field.heading * Math.PI) / 180;
   const travel = plane.velocity[0] * Math.sin(h) - plane.velocity[2] * Math.cos(h);
-  const fromThreshold = field.length / 2 + (travel >= 0 ? along : -along);
+  const direction = travel >= 0 ? 1 : -1;
   return {
     field,
+    direction,
     sinkFpm: Math.round((plane.airframe.lastTouchdown?.sink ?? 0) * FEET_PER_MINUTE),
     centreline: Math.abs(across),
-    fromThreshold,
+    offset: direction * across,
+    fromThreshold: field.length / 2 + direction * along,
     bank: Math.abs(readout.bank),
   };
 }
 
-export function gradeLanding(t, stoppedOnRunway) {
+/** How far past the landing threshold a point lies along the runway, for a landing in `direction` (±1). */
+export function distancePastThreshold(field, x, z, direction) {
+  const h = (field.heading * Math.PI) / 180;
+  return field.length / 2 + direction * ((x - field.x) * Math.sin(h) - (z - field.z) * Math.cos(h));
+}
+
+/** Points, a letter grade and the score card's lines for a landing, plus what the results card plots of it. */
+export function gradeLanding(t, stoppedOnRunway, stopDistance = null) {
   const notes = [];
   let points = 0;
   if (t.sinkFpm < 200) { points += 650; notes.push(['Touchdown', `${t.sinkFpm} ft/min — a greaser`, 650]); }
@@ -41,5 +50,6 @@ export function gradeLanding(t, stoppedOnRunway) {
   notes.push(['Wings level', `${t.bank.toFixed(1)}° of bank`, bankPts]);
   if (stoppedOnRunway) { points += 120; notes.push(['Rollout', 'Stopped on the runway', 120]); }
   const grade = points >= 1150 ? 'A' : points >= 900 ? 'B' : points >= 650 ? 'C' : points >= 400 ? 'D' : 'E';
-  return { points, grade, notes };
+  const plot = t.field ? { length: t.field.length, width: t.field.width, touchdown: t.fromThreshold, offset: t.offset ?? 0, stop: stopDistance } : null;
+  return { points, grade, notes, plot };
 }

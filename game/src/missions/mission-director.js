@@ -5,7 +5,7 @@
 import { AIRFIELDS, runwayEnds } from '../world/landmarks.js';
 import { runwayUnder } from '../world/world-builder.js';
 import { buildRingCourse } from './ring-courses.js';
-import { measureTouchdown, gradeLanding } from './landing-grader.js';
+import { measureTouchdown, gradeLanding, distancePastThreshold } from './landing-grader.js';
 import { SALTRUNNER } from '../flight/aircraft-spec.js';
 
 const fieldById = (id) => AIRFIELDS.find((f) => f.id === id);
@@ -127,7 +127,8 @@ export function createMissionDirector(world, mission) {
     if (st.stopTimer > 1.2) {
       if (st.touchdown.offRunway) return fail('Landed away from the runway');
       const onRunway = runwayUnder(plane.position[0], plane.position[2]) !== null;
-      st.landing = gradeLanding(st.touchdown, onRunway);
+      const t = st.touchdown;
+      st.landing = gradeLanding(t, onRunway, distancePastThreshold(t.field, plane.position[0], plane.position[2], t.direction));
       advance();
     }
   }
@@ -277,7 +278,7 @@ export function createMissionDirector(world, mission) {
       const total = lines.reduce((sum, l) => sum + l[2], 0);
       const m = mission.medals;
       const medal = !m ? null : total >= m[0] ? 'gold' : total >= m[1] ? 'silver' : total >= m[2] ? 'bronze' : null;
-      return { total, medal, lines, grade: st.landing?.grade ?? null, time: formatTime(st.elapsed) };
+      return { total, medal, lines, grade: st.landing?.grade ?? null, plot: st.landing?.plot ?? null, time: formatTime(st.elapsed) };
     },
   };
 }
