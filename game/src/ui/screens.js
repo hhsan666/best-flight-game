@@ -48,7 +48,7 @@ export function createScreens(root, onAction) {
         <button class="mission-card" data-action="brief" data-mission="${m.id}">
           <span class="sky-badge sky-${m.sky}">${SKY_ICONS[m.sky]}</span>
           <span><strong>${escape(m.title)}</strong><em>${escape(m.tagline)}</em></span>
-          ${medalBadge(progress[m.id]?.medal)}
+          <span class="record">${progress[m.id]?.score ? `<b>${progress[m.id].score}</b>` : ''}${medalBadge(progress[m.id]?.medal)}</span>
         </button>`).join('');
       show(`<div class="screen title">
         <header class="logo"><h1>SKERRY<span>WIND</span></h1><p>Island Air Courier</p></header>

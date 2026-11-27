@@ -222,6 +222,8 @@ const SHOTS = {
   },
   /** The title screen and its mission list over the circling Saltrunner. */
   title(api) {
+    // A pilot part-way through the sorties: the best medals the game keeps per mission.
+    Object.assign(api.progress, { 'first-light': { score: 3971, medal: 'gold' }, 'silverrun-gates': { score: 2210, medal: 'silver' }, 'ostmere-mail': { score: 1650, medal: 'bronze' } });
     api.showTitle();
     api.game.time = 22;
     api.rig.orbitYaw = 0.25;

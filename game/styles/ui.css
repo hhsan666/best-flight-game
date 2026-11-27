@@ -19,7 +19,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--ink); 
 #hud-overlay { pointer-events: none; }
 #screen-root { position: fixed; inset: 0; pointer-events: none; }
 #status-line { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-#loading-card { position: fixed; inset: auto 0 45% 0; text-align: center; font-size: 2.4vh; letter-spacing: 0.08em; color: var(--muted); }
+#loading-card { position: fixed; inset: auto 0 42% 0; display: grid; justify-items: center; gap: 1.2vh; text-align: center; font-size: 2.4vh; letter-spacing: 0.08em; color: var(--muted); }
+#loading-card b { font-weight: 700; }
+#loading-card span { max-width: 70vh; font-size: 1.7vh; letter-spacing: 0.02em; line-height: 1.5; opacity: 0.8; }
 #loading-card.done { display: none; }
 .screen { position: absolute; inset: 0; pointer-events: auto; }
 .panel { background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 1.4vh; backdrop-filter: blur(6px); box-shadow: 0 1vh 4vh rgba(0, 0, 0, 0.35); }
@@ -32,7 +34,7 @@ kbd { font-family: var(--mono); font-size: 0.85em; padding: 0.05em 0.45em; borde
 .logo h1 { margin: 0; font-size: 7.6vh; line-height: 1; letter-spacing: 0.14em; font-weight: 900; color: var(--cream); text-shadow: 0 0.4vh 2vh rgba(0, 0, 0, 0.6); }
 .logo h1 span { color: var(--amber); }
 .logo p { margin: 0.8vh 0 0; font-size: 2.1vh; letter-spacing: 0.32em; text-transform: uppercase; color: var(--teal); font-weight: 700; }
-.missions { position: absolute; left: 4.5vh; top: 17.5vh; width: min(52vh, 46vw); display: grid; gap: 1vh; }
+.missions { position: absolute; left: 4.5vh; top: 17.5vh; width: min(60vh, 48vw); display: grid; gap: 1vh; }
 .mission-card { display: grid; grid-template-columns: 4.6vh 1fr auto; align-items: center; gap: 1.4vh; text-align: left; padding: 0.9vh 1.4vh; background: rgba(12, 26, 32, 0.72); border: 1px solid rgba(255, 214, 150, 0.22); border-radius: 1.1vh; transition: transform 0.12s, border-color 0.12s, background 0.12s; }
 .mission-card:hover, .mission-card:focus-visible { transform: translateX(0.6vh); border-color: var(--amber); background: rgba(30, 44, 46, 0.85); outline: none; }
 .mission-card strong { display: block; font-size: 2.3vh; letter-spacing: 0.03em; }
@@ -43,6 +45,8 @@ kbd { font-family: var(--mono); font-size: 0.85em; padding: 0.05em 0.45em; borde
 .sky-golden { background: radial-gradient(circle at 50% 75%, #ffcf6b, #f07c45 55%, #5b6fa8); }
 .sky-storm { background: radial-gradient(circle at 50% 40%, #c9d0d6, #6b7884 70%); }
 .sky-dusk { background: radial-gradient(circle at 50% 85%, #ff9a5a, #7b4b8f 55%, #1d2552); }
+.mission-card .record { display: flex; align-items: center; gap: 1vh; }
+.mission-card .record b { font-size: 1.7vh; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums; }
 .medal { width: 3.4vh; height: 3.4vh; border-radius: 50%; display: grid; place-items: center; font-size: 1.6vh; font-weight: 900; color: var(--ink); background: rgba(255, 255, 255, 0.1); }
 .medal-gold { background: radial-gradient(circle at 35% 30%, #fff3b0, var(--gold) 60%, #b8860b); }
 .medal-silver { background: radial-gradient(circle at 35% 30%, #ffffff, var(--silver) 60%, #8a949c); }
