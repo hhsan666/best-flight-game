@@ -299,6 +299,32 @@ export function createFlightHud(canvas, minimap) {
     ctx.restore();
   }
 
+  /** The cockpit's coaming: a curved glare shield from pillar to pillar that the panel sits in. */
+  function glareShield(panelTop) {
+    const edge = (path) => {
+      path.moveTo(0, H * 0.8);
+      path.quadraticCurveTo(W * 0.5, panelTop - 30 * u, W, H * 0.8);
+    };
+    ctx.save();
+    const g = ctx.createLinearGradient(0, panelTop - 20 * u, 0, H);
+    g.addColorStop(0, '#2a2d32');
+    g.addColorStop(0.3, '#17191c');
+    g.addColorStop(1, '#0b0c0e');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    edge(ctx);
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,220,170,0.2)';
+    ctx.lineWidth = 1.5 * u;
+    ctx.beginPath();
+    edge(ctx);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   /** The sortie card: title and clock, the objective, progress, the steps as a checklist, score and par. */
   function missionPanel(m) {
     if (!m) return;
@@ -388,6 +414,7 @@ export function createFlightHud(canvas, minimap) {
       }
       const r = (view.cockpit ? 48 : 31) * u;
       const panelWidth = r * 2.36 * 6;
+      if (view.cockpit) glareShield(H - r * 2.5);
       drawInstrumentPanel(ctx, W / 2, H, r, {
         airspeed: readout.airspeed, pitch: readout.pitch, bank: readout.bank, altitude: readout.altitude, heading: readout.heading,
         course: view.course, verticalSpeed: readout.verticalSpeed, rpm: plane.engine.rpm, fuelFraction: plane.engine.fuel / SALTRUNNER.fuelCapacity, running: plane.engine.running,
