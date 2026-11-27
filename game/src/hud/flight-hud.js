@@ -80,8 +80,9 @@ export function createFlightHud(canvas, minimap) {
     ctx.rect(x, cy - h / 2, w, h);
     ctx.clip();
     for (let v = Math.floor((feet - 450) / 50) * 50; v <= feet + 450; v += 50) {
+      if (v < 0) continue;
       const y = cy - (v - feet) * perFoot;
-      ctx.fillStyle = v < 0 ? AMBER : GREEN;
+      ctx.fillStyle = GREEN;
       ctx.fillRect(x + 4 * u, y - u, (v % 100 === 0 ? 12 : 6) * u, 2 * u);
       if (v % 100 === 0) text(String(v), x + 20 * u, y, 14 * u, GREEN, 'left');
     }

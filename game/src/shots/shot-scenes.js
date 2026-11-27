@@ -120,8 +120,8 @@ const SHOTS = {
     const st = api.game.director.state;
     clearRings(st, [5.4, 3.2, 2.7, 4.4]);
     st.elapsed = 171;
-    const at = approachTo(st.rings, 4, 170, 4);
-    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 3, 1, -9, 50, 0.6, 0);
+    const at = approachTo(st.rings, 4, 105, 5);
+    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 3, -1, -9, 50, 0.6, 0);
     api.game.plane.landingLight = true;
     api.game.time = 91.4;
     api.rig.mode = 'cockpit';

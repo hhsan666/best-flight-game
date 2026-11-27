@@ -128,9 +128,15 @@ vec3 farmland(vec2 xz) {
   vec2 cell = floor(q);
   float pick = hash12(cell + 7.0);
   vec3 crop = pick < 0.25 ? vec3(0.74, 0.66, 0.32) : pick < 0.5 ? vec3(0.44, 0.60, 0.22) : pick < 0.68 ? vec3(0.58, 0.45, 0.30) : vec3(0.36, 0.52, 0.19);
-  vec2 edge = abs(fract(q) - 0.5);
-  crop *= 0.93 + 0.07 * sin((q.x * 1.7 + q.y * 0.3 + pick * 5.0) * 38.0);
-  return mix(crop, vec3(0.17, 0.29, 0.11), smoothstep(0.46, 0.5, max(edge.x, edge.y)));
+  // Crop rows fade out where they would be finer than a pixel, so far fields do not shimmer.
+  float rows = (q.x * 1.7 + q.y * 0.3) * 38.0;
+  crop *= 0.93 + 0.07 * sin(rows + pick * 190.0) * (1.0 - smoothstep(1.0, 2.5, fwidth(rows)));
+  // Hedgerows three metres wide between fields, box-filtered so each stays one clean line at any distance.
+  vec2 d = 0.5 - abs(fract(q) - 0.5);
+  vec2 fw = max(fwidth(q), vec2(1e-5));
+  vec2 hw = vec2(1.5 / 120.0, 1.5 / 75.0);
+  vec2 cover = clamp((hw + fw * 0.5 - d) / fw, 0.0, 1.0) * min(vec2(1.0), hw * 2.0 / fw);
+  return mix(crop, vec3(0.17, 0.29, 0.11), max(cover.x, cover.y));
 }
 vec3 terrainAlbedo(vec3 p, vec3 n, vec4 s) {
   float steep = 1.0 - n.y;
@@ -143,7 +149,7 @@ vec3 terrainAlbedo(vec3 p, vec3 n, vec4 s) {
   vec3 rock = mix(vec3(0.43, 0.41, 0.38), vec3(0.58, 0.54, 0.49), n2);
   vec3 sand = mix(vec3(0.88, 0.81, 0.62), vec3(0.79, 0.71, 0.53), n3);
   vec3 c = grass;
-  if (s.x > 0.01) c = mix(c, farmland(p.xz), s.x);
+  c = mix(c, farmland(p.xz), s.x);
   c = mix(c, forest, smoothstep(0.04, 0.6, s.y));
   c = mix(c, mix(vec3(0.56, 0.53, 0.47), vec3(0.36, 0.48, 0.25), step(0.55, n2)) * (0.85 + 0.3 * n3), s.z * 0.45);
   float rockiness = smoothstep(0.26, 0.48, steep + (n2 - 0.5) * 0.16) + smoothstep(620.0, 880.0, p.y + n1 * 90.0) * 0.7;
