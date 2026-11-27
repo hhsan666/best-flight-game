@@ -1,5 +1,28 @@
-// Skerrywind: boot, the fixed-step game loop and the flow between title, briefing, flight, pause
-// and results. The world is rebuilt from one seed; ?shot=<name> stages a screenshot scene instead.
+// Skerrywind — Island Air Courier: an original flight game in plain JavaScript, WebGL2, Canvas 2D
+// and Web Audio, with no engine, libraries or loaded assets. You fly the Saltrunner SR-2, a two-seat
+// island courier, over an archipelago built from one seed: the snowy Cairnhold range, the Silverrun
+// river canyon, beaches and shallows, four towns and two airfields.
+//
+// Five sorties ask for different skills, each with its own sky, wind and fuel load: First Light
+// (take off, seven harbour rings, land home), Silverrun Gates (ten canyon gates against the clock),
+// Mail to Ostmere (a fuel-tight crossing into a stiff headwind), Squall Final (a gusty crosswind
+// landing in rain) and Lantern Run (dusk rings, then a night landing); Free Flight has no clock.
+// A ring scores more the nearer its centre you thread it, every landing is graded (sink rate,
+// centreline, touchdown point, bank, rollout), fuel burns and the airframe takes damage as you fly,
+// and each scored sortie keeps its medal and personal best.
+//
+// Where things live: flight/ is the six-degree-of-freedom flight model (lift up to a sharp stall,
+// ground effect, propeller wash, wheels and brakes, engine and fuel, damage); missions/ runs and
+// scores the sorties; hud/ draws the tapes, sortie card, moving map and the backlit six-gauge panel;
+// render/ is the hand-written WebGL2 renderer (terrain with baked mountain shadows, sea and river
+// with waves and surf, sky with sun, stars and cirrus, cumulus billboards, instanced trees and
+// houses, runways with painted markings, approach lights and a working PAPI, windsocks, rings, the
+// aircraft with moving control surfaces and its shadow, particles, and four cameras); world/ builds
+// the archipelago; audio/ synthesises every sound; ui/ holds the title, briefing, help, settings
+// and results screens.
+//
+// This file boots the world, runs the fixed-step game loop and moves between title, briefing,
+// flight, pause and results; ?shot=<name> stages a screenshot scene instead.
 import { createAircraft, stepAircraft, applyPilotInput, flightReadout, PHYSICS_STEP } from './flight/flight-dynamics.js';
 import { SALTRUNNER } from './flight/aircraft-spec.js';
 import { enduranceMinutes } from './flight/powerplant.js';
