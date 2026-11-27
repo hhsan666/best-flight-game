@@ -1,11 +1,11 @@
-// Target rings: glowing hoops along a course. The next ring burns gold with orbiting beacons,
+// Target rings: banded hoops along a course. The next ring burns gold with orbiting beacons,
 // later ones glow pale, cleared ones turn green and fade.
-import { MeshBuilder, MATTE } from './mesh-builder.js';
+import { MeshBuilder, MATTE, BANDED } from './mesh-builder.js';
 import { uploadMesh, drawMesh } from './mesh-renderer.js';
 import { mat4FromPose, quatFromAttitude } from '../core/vector-math.js';
 
 export function createRingRenderer(gl, program) {
-  const hoop = uploadMesh(gl, new MeshBuilder().torus(1, 0.11, 48, 10, [0.95, 0.9, 0.8, MATTE]).build());
+  const hoop = uploadMesh(gl, new MeshBuilder().torus(1, 0.11, 64, 12, [0.95, 0.9, 0.8, BANDED]).build());
   const inner = uploadMesh(gl, new MeshBuilder().torus(0.9, 0.018, 48, 4, [1, 1, 1, MATTE]).build());
 
   const poseOf = (ring) => mat4FromPose(quatFromAttitude((ring.heading * Math.PI) / 180, (ring.pitch ?? 0) * Math.PI / 180, 0), ring.position, ring.radius);
@@ -21,7 +21,7 @@ export function createRingRenderer(gl, program) {
           return;
         }
         if (i === nextIndex) {
-          drawMesh(gl, program, hoop, { model, tint: [1, 0.74, 0.22], emissive: [0.75 * pulse, 0.36 * pulse, 0.05] });
+          drawMesh(gl, program, hoop, { model, tint: [1, 0.7, 0.16], emissive: [0.5 * pulse, 0.24 * pulse, 0.03] });
           drawMesh(gl, program, inner, { model, tint: [1, 1, 1], emissive: [0.9, 0.7, 0.3] });
         } else if (i < nextIndex + 4) {
           drawMesh(gl, program, hoop, { model, tint: [0.85, 0.92, 1], emissive: [0.25, 0.32, 0.45] });

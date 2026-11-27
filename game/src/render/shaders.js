@@ -318,8 +318,13 @@ void main() {
   float material = vColor.a;
   vec3 base = vColor.rgb * uTint;
   if (vSeed > 0.0) base *= 0.8 + 0.4 * fract(vSeed * 7.31);
+  float band = 0.0;
+  if (material > 4.5) {
+    band = step(0.72, fract(atan(vLocal.y, vLocal.x) * 1.2732395 + 0.36));
+    base = mix(base, vec3(0.97, 0.96, 0.92), band * 0.9);
+  }
   vec3 albedo = toLinear(base);
-  float shine = material > 2.5 ? (material > 3.5 ? 1.6 : 0.7) : 0.04;
+  float shine = material > 4.5 ? 0.7 : material > 2.5 ? (material > 3.5 ? 1.6 : 0.7) : 0.04;
   vec3 color = litSurface(albedo, n, vWorld, shine);
   if (material > 0.5 && material < 1.5) {
     vec3 q = vLocal * vScale;
@@ -332,7 +337,7 @@ void main() {
     color += window * lit * uNight * toLinear(vec3(1.0, 0.8, 0.48)) * 1.8;
   }
   if (material > 1.5 && material < 2.5) color = albedo * 2.4;
-  color += uEmissive;
+  color += uEmissive * (1.0 - band * 0.6);
   outColor = vec4(toDisplay(applyFog(color, vWorld)), uAlpha);
 }`;
 

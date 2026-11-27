@@ -96,7 +96,7 @@ const SHOTS = {
     st.nextRing = 4;
     st.cleared = 4;
     st.elapsed = 171;
-    const at = approachTo(st.rings, 4, 520, 4);
+    const at = approachTo(st.rings, 4, 170, 4);
     pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 3, 1, -9, 50, 0.6, 0);
     api.game.plane.landingLight = true;
     api.game.time = 91.4;
@@ -154,7 +154,7 @@ const SHOTS = {
     const field = AIRFIELDS[0];
     const end = runwayEnds(field)[1];
     const h = end.heading * DEG;
-    const d = 280;
+    const d = 150;
     const at = [end.x - Math.sin(h) * d + Math.cos(h) * 4, field.elevation + (300 + d) * Math.tan(3 * DEG) + 1.5, end.z + Math.cos(h) * d + Math.sin(h) * 4];
     const plane = api.game.plane;
     pose(plane, at, end.heading + 9, 1.5, 4, 34, 0.3, 2);
@@ -162,8 +162,8 @@ const SHOTS = {
     api.game.time = 26.6;
     const forward = [Math.sin(h), 0, -Math.cos(h)];
     const right = [Math.cos(h), 0, Math.sin(h)];
-    const eye = [0, 1, 2].map((i) => plane.position[i] - forward[i] * 15 + right[i] * 3 + (i === 1 ? 4.6 : 0));
-    const target = [end.x + forward[0] * 230, field.elevation + 4, end.z + forward[2] * 230];
+    const eye = [0, 1, 2].map((i) => plane.position[i] - forward[i] * 20 + right[i] * 3.5 + (i === 1 ? 5.6 : 0));
+    const target = [end.x + forward[0] * 170, field.elevation + 2, end.z + forward[2] * 170];
     api.rig.mode = 'chase';
     api.rig.override = { eye, target, up: [0, 1, 0], fov: 56 };
   },

@@ -1,5 +1,6 @@
 // Procedural mesh construction: boxes, prisms, cylinders, cones, tori and lofted hulls with
-// per-vertex colour and a material id (0 matte, 1 windowed wall, 2 self-lit, 3 gloss paint, 4 glass).
+// per-vertex colour and a material id (0 matte, 1 windowed wall, 2 self-lit, 3 gloss paint, 4 glass,
+// 5 banded gloss paint: alternating colour and white bands around the local Z axis, for course gates).
 import { cross, sub, normalize, quatRotate, add } from '../core/vector-math.js';
 
 export const MATTE = 0;
@@ -7,6 +8,7 @@ export const WINDOWED = 1;
 export const GLOW = 2;
 export const GLOSS = 3;
 export const GLASS = 4;
+export const BANDED = 5;
 
 export class MeshBuilder {
   constructor() {
