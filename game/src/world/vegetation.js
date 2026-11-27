@@ -4,7 +4,7 @@ import { createGradientNoise, fractalNoise, smoothstep } from '../core/noise.js'
 import { hashCell, subSeed } from '../core/seeded-random.js';
 import { AIRFIELDS, TOWNS, inApproachFunnel } from './landmarks.js';
 
-const TREE_SPACING = 26;
+const TREE_SPACING = 19;
 const INDEX_CELL = 64;
 
 /** How far a point is from anything that must stay clear of trees (runways, towns, the river). */
@@ -15,8 +15,8 @@ function clearingFactor(terrain, x, z) {
     const dx = x - field.x;
     const dz = z - field.z;
     const u = Math.abs(dx * Math.sin(h) - dz * Math.cos(h)) - field.length / 2 - 380;
-    const v = Math.abs(dx * Math.cos(h) + dz * Math.sin(h)) - field.width / 2 - 170;
-    factor *= smoothstep(0, 140, Math.max(u, v));
+    const v = Math.abs(dx * Math.cos(h) + dz * Math.sin(h)) - field.width / 2 - 260;
+    factor *= smoothstep(0, 220, Math.max(u, v));
   }
   for (const town of TOWNS) factor *= smoothstep(town.radius * 0.85, town.radius * 1.25, Math.hypot(x - town.x, z - town.z));
   if (inApproachFunnel(x, z, 2000)) return 0;

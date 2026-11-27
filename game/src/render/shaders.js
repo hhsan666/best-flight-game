@@ -144,7 +144,7 @@ vec3 terrainAlbedo(vec3 p, vec3 n, vec4 s) {
   vec3 sand = mix(vec3(0.88, 0.81, 0.62), vec3(0.79, 0.71, 0.53), n3);
   vec3 c = grass;
   if (s.x > 0.01) c = mix(c, farmland(p.xz), s.x);
-  c = mix(c, forest, s.y);
+  c = mix(c, forest, smoothstep(0.04, 0.6, s.y));
   c = mix(c, mix(vec3(0.56, 0.53, 0.47), vec3(0.36, 0.48, 0.25), step(0.55, n2)) * (0.85 + 0.3 * n3), s.z * 0.45);
   float rockiness = smoothstep(0.26, 0.48, steep + (n2 - 0.5) * 0.16) + smoothstep(620.0, 880.0, p.y + n1 * 90.0) * 0.7;
   c = mix(c, rock, clamp(rockiness, 0.0, 1.0));

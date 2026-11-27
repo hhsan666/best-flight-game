@@ -18,8 +18,8 @@ function coniferMesh() {
 function broadleafMesh() {
   const b = new MeshBuilder();
   b.cylinder(0.06, 0.05, 0, 0.4, 5, [0.38, 0.27, 0.17, MATTE], { caps: false });
-  b.blob([0, 0.62, 0], [0.42, 0.36, 0.42], [0.27, 0.45, 0.2, MATTE]);
-  b.blob([0.16, 0.78, 0.05], [0.24, 0.2, 0.24], [0.3, 0.5, 0.22, MATTE]);
+  b.blob([0, 0.62, 0], [0.42, 0.36, 0.42], [0.23, 0.41, 0.17, MATTE]);
+  b.blob([0.16, 0.78, 0.05], [0.24, 0.2, 0.24], [0.28, 0.47, 0.2, MATTE]);
   return b.build();
 }
 
