@@ -20,7 +20,7 @@ synthesised with Web Audio; the game loads no library, font or file from the net
   beside each runway; crashes say what happened ("The gear collapsed: touchdown at 960 ft/min").
 - **Cockpit**: airspeed, altitude and heading tapes, a flight-path marker, a moving map, and a
   backlit panel of six gauges (airspeed, attitude, altimeter, heading with course needle, vertical
-  speed, RPM and fuel). Chase, cockpit and orbit cameras.
+  speed, RPM and fuel). Chase, wing-chase, cockpit and orbit cameras.
 
 Controls: W/S pitch, A/D roll, Q/E rudder, R/F or mouse wheel throttle, G/T flaps, B or Space
 brakes, C camera, L landing light, Esc pause. Click the view to fly with the mouse.

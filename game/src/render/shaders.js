@@ -370,7 +370,8 @@ void main() {
   float r2 = dot(d, d);
   if (r2 > 1.0) discard;
   if (uGlow > 0.5) {
-    float core = exp(-r2 * 9.0) * 1.6 + exp(-r2 * 2.2) * 0.45;
+    // Daylight washes out the halo: by day a lamp shows as its bright core.
+    float core = exp(-r2 * 9.0) * 1.6 + exp(-r2 * 2.2) * 0.45 * mix(0.2, 1.0, uNight);
     float fade = 1.0 - fogFactor(vWorld) * 0.8;
     outColor = vec4(vColor.rgb * core * vColor.a * fade, 1.0);
   } else {

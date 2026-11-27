@@ -1,12 +1,15 @@
 // Cameras that never fight the pilot: a chase view that eases toward the flight path and keeps
-// the horizon readable (it follows only part of the bank), a cockpit view from the pilot's seat,
-// and an orbit view the mouse can drag around the aircraft.
+// the horizon readable (it follows only part of the bank), the same chase from over the right
+// wing's shoulder, a cockpit view from the pilot's seat, and an orbit view the mouse can drag.
 import {
   add, sub, scale, normalize, mix, cross, quatRotate, mat4Perspective, mat4LookAt, mat4Multiply, mat4Invert, frustumPlanes, DEG,
 } from '../core/vector-math.js';
 import { SALTRUNNER } from '../flight/aircraft-spec.js';
 
-export const CAMERA_MODES = ['chase', 'cockpit', 'orbit'];
+export const CAMERA_MODES = ['chase', 'quarter', 'cockpit', 'orbit'];
+
+/** Where each chase camera sits behind the aircraft: metres back, up and to the right. */
+const CHASE_OFFSETS = { chase: [11, 2.9, 0], quarter: [12.5, 3.4, 4] };
 
 export function createCameraRig() {
   const rig = {
@@ -57,7 +60,9 @@ export function createCameraRig() {
       const ease = 1 - Math.exp(-dt * 3.2);
       rig.lookDir = normalize(mix(rig.lookDir, wanted, ease));
       rig.upDir = normalize(mix(rig.upDir, normalize(mix([0, 1, 0], planeUp, 0.4)), 1 - Math.exp(-dt * 2.5)));
-      eye = add(sub(plane.position, scale(rig.lookDir, 11)), scale(rig.upDir, 2.9));
+      const [back, lift, side] = CHASE_OFFSETS[rig.mode] ?? CHASE_OFFSETS.chase;
+      const right = normalize(cross(rig.lookDir, rig.upDir));
+      eye = add(add(sub(plane.position, scale(rig.lookDir, back)), scale(rig.upDir, lift)), scale(right, side));
       target = add(plane.position, add(scale(rig.lookDir, 26), scale(rig.upDir, 1.9)));
       up = rig.upDir;
     }

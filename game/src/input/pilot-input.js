@@ -14,7 +14,7 @@ export const CONTROL_HELP = [
   ['B  or  Space', 'Wheel brakes'],
   ['Click the view', 'Fly with the mouse as a self-centring stick'],
   ['Right-drag', 'Look around (orbit camera)'],
-  ['C', 'Camera: chase, cockpit, orbit'],
+  ['C', 'Camera: chase, wing chase, cockpit, orbit'],
   ['L', 'Landing light'],
   ['Esc  or  P', 'Pause'],
 ];

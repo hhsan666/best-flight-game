@@ -95,7 +95,7 @@ const SHOTS = {
     api.rig.reset(api.game.plane);
     settleChase(api);
   },
-  /** Cover. First Light: harbour ring 5 just ahead over the beach and shallows, the Cairnhold beyond. */
+  /** Cover. First Light from the wing chase: harbour ring 5 just ahead over the beach, the Cairnhold beyond. */
   harbourPass(api) {
     api.startMission(missionById('first-light'));
     const st = api.game.director.state;
@@ -104,10 +104,12 @@ const SHOTS = {
     clearRings(st, [4.2, 2.6, 5.1, 3.4]);
     st.elapsed = 164;
     const at = approachTo(st.rings, 4, 70, 2.5);
-    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 4, 2, 14, 52, 0.72, 0);
+    const heading = headingBetween(at, st.rings[4].position) + 4;
+    const plane = api.game.plane;
+    pose(plane, at, heading, 2, 14, 52, 0.72, 0);
     api.game.time = 52.5;
-    api.rig.mode = 'chase';
-    api.rig.reset(api.game.plane);
+    api.rig.mode = 'quarter';
+    api.rig.reset(plane);
     settleChase(api);
   },
   /** Cockpit at dusk on the Lantern Run, over Port Halloway's lit streets with the lantern rings ahead. */
