@@ -76,7 +76,7 @@ function windAt(plane, mission, time) {
 
 function startMission(mission) {
   game.mission = mission;
-  game.director = createMissionDirector(world, mission);
+  game.director = createMissionDirector(world, mission, progress[mission.id] ?? null);
   const spawn = spawnFor(mission);
   game.plane = createAircraft(SALTRUNNER, { ...spawn, fuel: mission.fuel });
   game.atmosphere = buildAtmosphere(mission.sky);

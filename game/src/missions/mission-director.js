@@ -10,6 +10,7 @@ import { SALTRUNNER } from '../flight/aircraft-spec.js';
 
 const fieldById = (id) => AIRFIELDS.find((f) => f.id === id);
 const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const formatSplit = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 
 /** Points for threading a ring `offset` metres from its centre: 150, plus up to 40 for a pass near the middle. */
 export function ringPoints(offset, radius) {
@@ -41,12 +42,22 @@ export function spawnFor(mission) {
   return { position: [a.x, a.altitude, a.z], heading: (a.heading * Math.PI) / 180, speed: a.speed, throttle: 0.68, flaps: 0 };
 }
 
-export function createMissionDirector(world, mission) {
+/** `bestRun` is this mission's best saved run, if any: its ring splits are the times to beat. */
+export function createMissionDirector(world, mission, bestRun = null) {
   const st = {
-    mission, step: 0, elapsed: 0, rings: [], nextRing: 0, cleared: 0, missed: 0, ringScore: 0, offsets: [], status: 'flying', failReason: '',
+    mission, step: 0, elapsed: 0, rings: [], nextRing: 0, cleared: 0, missed: 0, ringScore: 0, offsets: [], splits: [], status: 'flying', failReason: '',
     messages: [], touchdown: null, landing: null, stopTimer: 0, startFuel: mission.fuel, previous: null, airborneTime: 0, warned: false,
   };
   const say = (text, colour = '#ffffff', big = false, life = 2.8) => st.messages.push({ text, colour, big, life });
+  /** The clock at each ring reached; against a best run it calls out the time gained or lost. */
+  const noteSplit = () => {
+    const ref = bestRun?.splits?.[st.splits.length];
+    st.splits.push(st.elapsed);
+    if (typeof ref !== 'number') return;
+    const delta = st.elapsed - ref;
+    const gap = Math.abs(delta) < 0.05 ? 'level with best' : `${delta < 0 ? '−' : '+'}${Math.abs(delta).toFixed(1)} s vs best`;
+    say(`SPLIT ${formatSplit(st.elapsed)}  ${gap}`, delta < 0.05 ? '#9dffc6' : '#ffc23a');
+  };
   const current = () => mission.steps[st.step];
   const courses = new Map();
   /** The rings of a rings step (built once per course, for steps not yet flown). */
@@ -110,6 +121,7 @@ export function createMissionDirector(world, mission) {
       say(`MISSED RING ${st.nextRing + 1}  −100`, '#ff7a6b', true);
       st.lastEvent = 'miss';
     } else return;
+    noteSplit();
     st.nextRing += 1;
     if (st.nextRing >= st.rings.length) advance();
   }
@@ -287,7 +299,7 @@ export function createMissionDirector(world, mission) {
       const total = lines.reduce((sum, l) => sum + l[2], 0);
       const m = mission.medals;
       const medal = !m ? null : total >= m[0] ? 'gold' : total >= m[1] ? 'silver' : total >= m[2] ? 'bronze' : null;
-      return { total, medal, lines, grade: st.landing?.grade ?? null, plot: st.landing?.plot ?? null, time: formatTime(st.elapsed) };
+      return { total, medal, lines, grade: st.landing?.grade ?? null, plot: st.landing?.plot ?? null, time: formatTime(st.elapsed), splits: [...st.splits] };
     },
   };
 }

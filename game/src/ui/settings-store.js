@@ -29,11 +29,14 @@ export const loadProgress = () => read(PROGRESS_KEY, {});
 
 const MEDAL_RANK = { gold: 3, silver: 2, bronze: 1 };
 
-/** Keeps the best score and medal per mission; returns true when this run set a new best. */
+/** Keeps the best score and medal per mission, and that run's ring splits to race next time; returns true when this run set a new best. */
 export function recordResult(progress, missionId, card) {
   const best = progress[missionId];
   const better = !best || card.total > best.score;
-  if (better) progress[missionId] = { score: card.total, medal: (MEDAL_RANK[card.medal] ?? 0) >= (MEDAL_RANK[best?.medal] ?? 0) ? card.medal : best.medal };
+  if (better) {
+    progress[missionId] = { score: card.total, medal: (MEDAL_RANK[card.medal] ?? 0) >= (MEDAL_RANK[best?.medal] ?? 0) ? card.medal : best.medal };
+    if (card.splits?.length) progress[missionId].splits = card.splits.map((t) => Math.round(t * 10) / 10);
+  }
   write(PROGRESS_KEY, progress);
   return better;
 }

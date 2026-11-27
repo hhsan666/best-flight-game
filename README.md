@@ -18,7 +18,8 @@ synthesised with Web Audio; the game loads no library, font or file from the net
   crosswind landing), *Lantern Run* (dusk rings and a night landing), and *Free Flight*.
 - **Sortie card**: each mission's steps as a checklist, a running score (rings threaded near their
   centre score more), the par time, and the fuel the rest of the route needs at your ground speed
-  set against what is left in the tank at the present throttle.
+  set against what is left in the tank at the present throttle. Your best run is saved: each ring
+  then calls out your split against it, and briefings list the medal scores to aim for.
 - **Landings are graded** on sink rate, centreline, touchdown point and bank, with a working PAPI
   beside each runway, and the results card plots the touchdown and rollout on the runway; crashes
   say what happened ("The gear collapsed: touchdown at 960 ft/min").
