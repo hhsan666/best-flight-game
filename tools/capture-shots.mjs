@@ -15,7 +15,7 @@ const { chromium } = require('playwright');
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const gameRoot = join(root, 'game');
 const SHOTS = [
-  { file: '1-cover.jpg', scene: 'gatePass' },
+  { file: '1-cover.jpg', scene: 'harbourPass' },
   { file: '2-cockpit-dusk.jpg', scene: 'cockpit' },
   { file: '3-squall-final.jpg', scene: 'squall' },
   { file: '4-results.jpg', scene: 'results' },

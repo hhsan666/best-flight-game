@@ -1,6 +1,7 @@
 // Runs one sortie: places the aircraft, walks the mission's steps (take off, rings, fly to a field,
-// land), detects ring passes and misses through each ring's plane, grades the landing, ends the
-// flight on a crash or a stop, and totals the score card with its medal.
+// land), detects ring passes and misses through each ring's plane (a pass nearer the centre scores
+// more), grades the landing, plans the fuel the rest of the route needs, ends the flight on a crash
+// or a stop, and totals the score card with its medal.
 import { AIRFIELDS, runwayEnds } from '../world/landmarks.js';
 import { runwayUnder } from '../world/world-builder.js';
 import { buildRingCourse } from './ring-courses.js';
@@ -9,6 +10,16 @@ import { SALTRUNNER } from '../flight/aircraft-spec.js';
 
 const fieldById = (id) => AIRFIELDS.find((f) => f.id === id);
 const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+/** Points for threading a ring `offset` metres from its centre: 150, plus up to 40 for a pass near the middle. */
+export function ringPoints(offset, radius) {
+  return 150 + Math.round(40 * Math.max(0, 1 - offset / radius));
+}
+
+/** Minutes of flying the rest of a route needs at a ground speed, with a minute for the approach when it ends on a runway. */
+export function routeMinutes(metres, groundSpeed, endsWithLanding) {
+  return metres / Math.max(groundSpeed, 38) / 60 + (endsWithLanding ? 1 : 0);
+}
 
 /** Where and how the aircraft starts: on a runway, in the air, or established on final. */
 export function spawnFor(mission) {
@@ -32,11 +43,18 @@ export function spawnFor(mission) {
 
 export function createMissionDirector(world, mission) {
   const st = {
-    mission, step: 0, elapsed: 0, rings: [], nextRing: 0, cleared: 0, missed: 0, status: 'flying', failReason: '',
+    mission, step: 0, elapsed: 0, rings: [], nextRing: 0, cleared: 0, missed: 0, ringScore: 0, offsets: [], status: 'flying', failReason: '',
     messages: [], touchdown: null, landing: null, stopTimer: 0, startFuel: mission.fuel, previous: null, airborneTime: 0, warned: false,
   };
   const say = (text, colour = '#ffffff', big = false, life = 2.8) => st.messages.push({ text, colour, big, life });
   const current = () => mission.steps[st.step];
+  const courses = new Map();
+  /** The rings of a rings step (built once per course, for steps not yet flown). */
+  const courseOf = (step) => {
+    if (step === current() && st.rings.length) return st.rings;
+    if (!courses.has(step.course)) courses.set(step.course, buildRingCourse(step.course, world));
+    return courses.get(step.course);
+  };
 
   const enterStep = () => {
     const step = current();
@@ -77,12 +95,16 @@ export function createMissionDirector(world, mission) {
     const cross = st.previous.map((v, i) => v + (plane.position[i] - v) * t);
     const offset = Math.hypot(cross[0] - ring.position[0], cross[1] - ring.position[1], cross[2] - ring.position[2]);
     if (offset <= ring.radius) {
+      const points = ringPoints(offset, ring.radius);
       st.cleared += 1;
+      st.ringScore += points;
+      st.offsets.push(offset);
       ring.clearedAt = st.elapsed;
-      say(`RING ${st.nextRing + 1}/${st.rings.length}  +150`, '#9dffc6', true);
+      say(`RING ${st.nextRing + 1}/${st.rings.length}  ${offset.toFixed(1)} m off centre  +${points}`, '#9dffc6', true);
       st.lastEvent = 'ring';
     } else if (offset <= ring.radius * 4) {
       st.missed += 1;
+      st.ringScore -= 100;
       say(`MISSED RING ${st.nextRing + 1}  −100`, '#ff7a6b', true);
       st.lastEvent = 'miss';
     } else return;
@@ -187,8 +209,50 @@ export function createMissionDirector(world, mission) {
       const within = step?.type === 'rings' && st.rings.length ? st.nextRing / st.rings.length : 0;
       return st.status === 'complete' ? 1 : (st.step + within) / steps;
     },
-    hudMission() {
-      return { title: mission.title, objective: this.objective(), time: formatTime(st.elapsed), progress: this.progress() };
+    /** The steps as a checklist: each with a short label and whether it is done, current or still to come. */
+    checklist() {
+      return mission.steps.map((step, i) => {
+        const state = st.status === 'complete' || i < st.step ? 'done' : i === st.step ? 'current' : 'next';
+        let label = 'EXPLORE';
+        if (step.type === 'takeoff') label = 'TAKE OFF';
+        else if (step.type === 'rings') label = `RINGS ${i < st.step ? courseOf(step).length : i === st.step ? st.nextRing : 0}/${courseOf(step).length}`;
+        else if (step.type === 'fly-to') label = `FLY TO ${fieldById(step.airfield).code}`;
+        else if (step.type === 'land') label = `LAND ${fieldById(step.airfield).code}`;
+        return { label, state };
+      });
+    },
+    /** Metres still to fly: through the rings left, then to each field the remaining steps name. */
+    routeAhead(plane) {
+      let from = plane.position;
+      let metres = 0;
+      for (let i = st.step; i < mission.steps.length; i++) {
+        const step = mission.steps[i];
+        let points = [];
+        if (step.type === 'rings') points = (i === st.step ? st.rings.slice(st.nextRing) : courseOf(step)).map((r) => r.position);
+        else if (step.type === 'fly-to' || (step.type === 'land' && (i === st.step || mission.steps[i - 1]?.type !== 'fly-to'))) {
+          const f = fieldById(step.airfield);
+          points = [[f.x, f.elevation, f.z]];
+        }
+        for (const p of points) {
+          metres += Math.hypot(p[0] - from[0], p[2] - from[2]);
+          from = p;
+        }
+      }
+      return metres;
+    },
+    /** Minutes the rest of the sortie needs at the present ground speed, or null when there is no route to fly. */
+    fuelNeeded(plane) {
+      if (st.status !== 'flying' || mission.steps[st.step]?.type === 'explore') return null;
+      const lands = mission.steps.slice(st.step).some((s) => s.type === 'land');
+      return routeMinutes(this.routeAhead(plane), Math.hypot(plane.velocity[0], plane.velocity[2]), lands);
+    },
+    hudMission(plane) {
+      return {
+        title: mission.title, objective: this.objective(), time: formatTime(st.elapsed), progress: this.progress(),
+        checklist: this.checklist(), score: mission.steps.some((step) => step.type === 'rings') ? st.ringScore : null, wind: mission.wind,
+        par: mission.par ? formatTime(mission.par) : null,
+        overPar: mission.par ? st.elapsed > mission.par : false, fuelNeeded: plane ? this.fuelNeeded(plane) : null,
+      };
     },
     mapTargets() {
       return st.rings.slice(st.nextRing, st.nextRing + 6).map((r, i) => ({ x: r.position[0], z: r.position[2], next: i === 0 }));
@@ -199,7 +263,8 @@ export function createMissionDirector(world, mission) {
       if (st.status !== 'complete') return { total: 0, medal: null, lines: [['Mission failed', st.failReason, 0]] };
       lines.push(['Mission complete', mission.title, 1000]);
       if (st.rings.length) {
-        lines.push(['Rings', `${st.cleared} cleared, ${st.missed} missed`, st.cleared * 150 - st.missed * 100]);
+        const mean = st.offsets.length ? st.offsets.reduce((a, b) => a + b, 0) / st.offsets.length : 0;
+        lines.push(['Rings', `${st.cleared} cleared, ${st.missed} missed · ${mean.toFixed(1)} m off centre`, st.ringScore]);
       }
       if (mission.par) {
         const bonus = Math.max(0, Math.round((mission.par - st.elapsed) * 4));

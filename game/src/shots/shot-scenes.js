@@ -8,6 +8,7 @@ import { AIRFIELDS, runwayEnds } from '../world/landmarks.js';
 import { SALTRUNNER } from '../flight/aircraft-spec.js';
 import { gradeLanding } from '../missions/landing-grader.js';
 import { buildRingCourse } from '../missions/ring-courses.js';
+import { ringPoints } from '../missions/mission-director.js';
 
 const DEG = Math.PI / 180;
 
@@ -40,6 +41,14 @@ function approachTo(rings, index, distance, drop = 0) {
   return [ring.position[0] - (dx / l) * distance, ring.position[1] - drop, ring.position[2] - (dz / l) * distance];
 }
 
+/** Marks the first rings of the course as threaded at the given distances from their centres. */
+function clearRings(st, offsets) {
+  st.nextRing = offsets.length;
+  st.cleared = offsets.length;
+  st.offsets = [...offsets];
+  st.ringScore = offsets.reduce((sum, offset, i) => sum + ringPoints(offset, st.rings[i].radius), 0);
+}
+
 function settleChase(api) {
   for (let i = 0; i < 60; i++) api.rig.update(api.game.plane, api.world.terrain, 0.1, { width: 768, height: 480 });
 }
@@ -49,8 +58,7 @@ const SHOTS = {
   canyon(api) {
     api.startMission(missionById('silverrun-gates'));
     const st = api.game.director.state;
-    st.nextRing = 4;
-    st.cleared = 4;
+    clearRings(st, [3.1, 1.8, 4.6, 2.4]);
     st.elapsed = 52;
     const at = approachTo(st.rings, 4, 210, 6);
     pose(api.game.plane, at, headingBetween(at, st.rings[4].position) - 4, 3, 14, 54, 0.82, 0);
@@ -63,8 +71,7 @@ const SHOTS = {
   gatePass(api) {
     api.startMission(missionById('silverrun-gates'));
     const st = api.game.director.state;
-    st.nextRing = 5;
-    st.cleared = 5;
+    clearRings(st, [3.1, 1.8, 4.6, 2.4, 3.3]);
     st.elapsed = 61;
     const at = approachTo(st.rings, 5, 24, 1.5);
     pose(api.game.plane, at, headingBetween(at, st.rings[5].position) + 2, 2, -18, 55, 0.85, 0);
@@ -73,14 +80,13 @@ const SHOTS = {
     api.rig.reset(api.game.plane);
     settleChase(api);
   },
-  /** Cover. First Light along the harbour coast: beach, shallows, forest and the Cairnhold peaks, ring 5 ahead. */
+  /** First Light along the harbour coast from further back: beach, shallows, forest and the Cairnhold peaks. */
   coast(api) {
     api.startMission(missionById('first-light'));
     const st = api.game.director.state;
     st.step = 1;
     st.rings = buildRingCourse('harbour', api.world);
-    st.nextRing = 4;
-    st.cleared = 4;
+    clearRings(st, [4.2, 2.6, 5.1, 3.4]);
     st.elapsed = 162;
     const at = approachTo(st.rings, 4, 250, 6);
     pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 7, 3, 12, 52, 0.72, 0);
@@ -89,12 +95,26 @@ const SHOTS = {
     api.rig.reset(api.game.plane);
     settleChase(api);
   },
+  /** Cover. First Light: harbour ring 5 just ahead over the beach and shallows, the Cairnhold beyond. */
+  harbourPass(api) {
+    api.startMission(missionById('first-light'));
+    const st = api.game.director.state;
+    st.step = 1;
+    st.rings = buildRingCourse('harbour', api.world);
+    clearRings(st, [4.2, 2.6, 5.1, 3.4]);
+    st.elapsed = 164;
+    const at = approachTo(st.rings, 4, 70, 2.5);
+    pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 4, 2, 14, 52, 0.72, 0);
+    api.game.time = 52.5;
+    api.rig.mode = 'chase';
+    api.rig.reset(api.game.plane);
+    settleChase(api);
+  },
   /** Cockpit at dusk on the Lantern Run, over Port Halloway's lit streets with the lantern rings ahead. */
   cockpit(api) {
     api.startMission(missionById('lantern-run'));
     const st = api.game.director.state;
-    st.nextRing = 4;
-    st.cleared = 4;
+    clearRings(st, [5.4, 3.2, 2.7, 4.4]);
     st.elapsed = 171;
     const at = approachTo(st.rings, 4, 170, 4);
     pose(api.game.plane, at, headingBetween(at, st.rings[4].position) + 3, 1, -9, 50, 0.6, 0);
@@ -108,8 +128,8 @@ const SHOTS = {
     api.startMission(mission);
     const st = api.game.director.state;
     st.step = 2;
-    st.cleared = 7;
-    st.nextRing = 7;
+    st.rings = buildRingCourse('harbour', api.world);
+    clearRings(st, [4.2, 2.6, 5.1, 3.4, 2.2, 3.8, 1.9]);
     st.elapsed = 236;
     const field = AIRFIELDS[0];
     const [low] = runwayEnds(field);
@@ -132,8 +152,7 @@ const SHOTS = {
     api.startMission(missionById('lantern-run'));
     const st = api.game.director.state;
     st.step = 1;
-    st.cleared = 7;
-    st.nextRing = 7;
+    clearRings(st, [5.4, 3.2, 2.7, 4.4, 3.6, 2.1, 4.9]);
     st.elapsed = 287;
     const field = AIRFIELDS[0];
     const [low] = runwayEnds(field);
@@ -175,8 +194,10 @@ const SHOTS = {
     const [low] = runwayEnds(field);
     const h = low.heading * DEG;
     const st = api.game.director.state;
+    st.rings = buildRingCourse('harbour', api.world);
+    clearRings(st, [4.2, 2.6, 5.1, 3.4, 2.2, 3.8, 1.9]);
     st.rings.forEach((r) => (r.clearedAt = -99));
-    Object.assign(st, { step: 3, nextRing: 7, cleared: 7, missed: 0, elapsed: 247, status: 'complete' });
+    Object.assign(st, { step: 3, missed: 0, elapsed: 247, status: 'complete' });
     st.landing = gradeLanding({ sinkFpm: 186, centreline: 1.3, fromThreshold: 292, bank: 0.8 }, true);
     const plane = api.game.plane;
     pose(plane, [low.x + Math.sin(h) * 760, field.elevation + 1.53, low.z - Math.cos(h) * 760], low.heading + 12, 0.2, 0, 0, 0, 2);

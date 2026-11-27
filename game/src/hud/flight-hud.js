@@ -268,19 +268,29 @@ export function createFlightHud(canvas, minimap) {
     ctx.restore();
   }
 
+  /** The sortie card: title and clock, the objective, progress, the steps as a checklist, score and par. */
   function missionPanel(m) {
     if (!m) return;
     const x = 22 * u;
     const y = 12 * u;
     const w = Math.min(250 * u, W * 0.3);
-    glassPanel(x, y, w, 64 * u);
+    glassPanel(x, y, w, 94 * u);
     text(m.title.toUpperCase(), x + 10 * u, y + 13 * u, 12 * u, AMBER, 'left', 800);
     text(m.time, x + w - 10 * u, y + 13 * u, 14 * u, '#ffffff', 'right', 700, MONO);
-    text(m.objective, x + 10 * u, y + 33 * u, 13 * u, '#ffffff', 'left', 600);
+    text(m.objective, x + 10 * u, y + 32 * u, 13 * u, '#ffffff', 'left', 600);
     ctx.fillStyle = 'rgba(166,255,207,0.25)';
-    ctx.fillRect(x + 10 * u, y + 50 * u, w - 20 * u, 5 * u);
+    ctx.fillRect(x + 10 * u, y + 45 * u, w - 20 * u, 4 * u);
     ctx.fillStyle = AMBER;
-    ctx.fillRect(x + 10 * u, y + 50 * u, (w - 20 * u) * Math.min(1, m.progress), 5 * u);
+    ctx.fillRect(x + 10 * u, y + 45 * u, (w - 20 * u) * Math.min(1, m.progress), 4 * u);
+    let cx = x + 10 * u;
+    for (const item of m.checklist ?? []) {
+      const label = `${item.state === 'done' ? '✓' : item.state === 'current' ? '▸' : '○'} ${item.label}`;
+      text(label, cx, y + 62 * u, 10.5 * u, item.state === 'done' ? GREEN : item.state === 'current' ? AMBER : 'rgba(225,235,230,0.6)', 'left', 800);
+      cx += ctx.measureText(label).width + 10 * u;
+    }
+    const wind = m.wind ? `WIND ${String(m.wind.from).padStart(3, '0')}°/${m.wind.knots}${m.wind.gust >= 5 ? `G${m.wind.knots + m.wind.gust}` : ''} KT` : '';
+    text(m.score !== null && m.score !== undefined ? `SCORE ${m.score}` : wind, x + 10 * u, y + 80 * u, 11.5 * u, '#ffffff', 'left', 700, MONO);
+    if (m.par) text(`PAR ${m.par}`, x + w - 10 * u, y + 80 * u, 11.5 * u, m.overPar ? RED : GREEN, 'right', 700, MONO);
   }
 
   function warnings(list, time) {
@@ -355,14 +365,22 @@ export function createFlightHud(canvas, minimap) {
       const mapR = 58 * u;
       if (minimap) minimap.draw(ctx, W - 22 * u - mapR, 12 * u + mapR, mapR, plane, readout.heading, view.mapTargets ?? []);
       const fuelMin = view.fuelMinutes;
-      const fuelText = Number.isFinite(fuelMin) ? `FUEL ${Math.floor(fuelMin)}:${String(Math.floor((fuelMin % 1) * 60)).padStart(2, '0')}` : 'FUEL --';
-      const right = Math.min(W - 8 * u - 104 * u, W / 2 + panelWidth / 2 + 12 * u);
-      glassPanel(right, H - 82 * u, 104 * u, 22 * u, 5 * u);
-      text(fuelText, right + 52 * u, H - 71 * u, 12 * u, fuelMin < 1.5 ? RED : '#ffffff', 'center', 800);
-      glassPanel(right, H - 56 * u, 104 * u, 22 * u, 5 * u);
-      text(`DAMAGE ${Math.round(plane.airframe.damage * 100)}%`, right + 52 * u, H - 45 * u, 12 * u, plane.airframe.damage > 0.3 ? RED : '#ffffff', 'center', 800);
-      glassPanel(right, H - 30 * u, 104 * u, 22 * u, 5 * u);
-      text(`G ${plane.gForce.toFixed(1)}`, right + 52 * u, H - 19 * u, 12 * u, plane.gForce > 4.5 ? AMBER : '#ffffff', 'center', 800);
+      const clock = (m) => `${Math.floor(m)}:${String(Math.floor((m % 1) * 60)).padStart(2, '0')}`;
+      const need = view.mission?.fuelNeeded;
+      const chipW = Number.isFinite(need) ? 150 * u : 104 * u;
+      const right = Math.min(W - 8 * u - chipW, W / 2 + panelWidth / 2 + 12 * u);
+      glassPanel(right, H - 82 * u, chipW, 22 * u, 5 * u);
+      const fuelText = Number.isFinite(fuelMin) ? `FUEL ${clock(fuelMin)}` : 'FUEL --';
+      if (Number.isFinite(need)) {
+        // Endurance at the present fuel flow against what the rest of the route needs at this ground speed.
+        const margin = Number.isFinite(fuelMin) ? fuelMin / Math.max(need, 0.01) : Infinity;
+        text(fuelText, right + 8 * u, H - 71 * u, 12 * u, fuelMin < 1.5 ? RED : '#ffffff', 'left', 800);
+        text(`NEED ${clock(need)}`, right + chipW - 8 * u, H - 71 * u, 12 * u, margin < 1 ? RED : margin < 1.25 ? AMBER : GREEN, 'right', 800);
+      } else text(fuelText, right + chipW / 2, H - 71 * u, 12 * u, fuelMin < 1.5 ? RED : '#ffffff', 'center', 800);
+      glassPanel(right, H - 56 * u, chipW, 22 * u, 5 * u);
+      text(`DAMAGE ${Math.round(plane.airframe.damage * 100)}%`, right + chipW / 2, H - 45 * u, 12 * u, plane.airframe.damage > 0.3 ? RED : '#ffffff', 'center', 800);
+      glassPanel(right, H - 30 * u, chipW, 22 * u, 5 * u);
+      text(`G ${plane.gForce.toFixed(1)}`, right + chipW / 2, H - 19 * u, 12 * u, plane.gForce > 4.5 ? AMBER : '#ffffff', 'center', 800);
     },
   };
 }
