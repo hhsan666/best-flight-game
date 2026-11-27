@@ -123,7 +123,37 @@ export function createFlightHud(canvas, minimap) {
     text(String(value), x + w / 2, cy + u, 24 * u, '#ffffff', 'center', 800, MONO);
   }
 
-  function headingTape(heading, course) {
+  /** The wind beside the heading box: an arrow showing where it blows relative to the nose, and its speed. */
+  function windChip(x, y, heading, wind) {
+    const speed = Math.hypot(wind[0], wind[2]) * KNOTS;
+    glassPanel(x, y, 76 * u, 22 * u, 5 * u);
+    if (speed < 1) {
+      text('CALM', x + 38 * u, y + 11 * u, 11 * u, GREEN, 'center', 800);
+      return;
+    }
+    const to = (Math.atan2(wind[0], -wind[2]) * 180) / Math.PI;
+    const ax = x + 13 * u;
+    const ay = y + 11 * u;
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.rotate(((to - heading) * Math.PI) / 180);
+    ctx.strokeStyle = '#7fd7ff';
+    ctx.fillStyle = '#7fd7ff';
+    ctx.lineWidth = 2 * u;
+    ctx.beginPath();
+    ctx.moveTo(0, 7 * u);
+    ctx.lineTo(0, -3 * u);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, -8 * u);
+    ctx.lineTo(-4.5 * u, -2 * u);
+    ctx.lineTo(4.5 * u, -2 * u);
+    ctx.fill();
+    ctx.restore();
+    text(`WIND ${Math.round(speed)}`, x + 47 * u, y + 11 * u, 11 * u, '#7fd7ff', 'center', 800);
+  }
+
+  function headingTape(heading, course, wind) {
     const w = 330 * u;
     const h = 34 * u;
     const cx = W / 2;
@@ -165,6 +195,7 @@ export function createFlightHud(canvas, minimap) {
     ctx.fill();
     ctx.stroke();
     text(`${String(Math.round(heading) % 360).padStart(3, '0')}°`, cx, y + h + 17 * u, 21 * u, '#ffffff', 'center', 800, MONO);
+    if (wind) windChip(cx + boxW / 2 + 8 * u, y + h + 5 * u, heading, wind);
   }
 
   function project(camera, p) {
@@ -345,7 +376,7 @@ export function createFlightHud(canvas, minimap) {
       targetMarker(view.camera, view.target);
       speedTape(kt);
       altitudeTape(readout.altitude * FEET, readout.verticalSpeed * FEET_PER_MINUTE, readout.heightAboveGround);
-      headingTape(readout.heading, view.course);
+      headingTape(readout.heading, view.course, view.wind);
       missionPanel(view.mission);
       warnings(view.warnings, view.time);
       let my = 96 * u;

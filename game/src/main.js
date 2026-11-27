@@ -248,7 +248,7 @@ function renderFrame(dt, readout) {
     hud.draw({
       plane, readout, camera, target, course, time: game.time, cockpit: rig.mode === 'cockpit', assist: settings.assist, rain: game.atmosphere.rain,
       mission: director.hudMission(plane), warnings: warningsFor(plane, readout), messages: director.state.messages,
-      mapTargets: director.mapTargets(), fuelMinutes: enduranceMinutes(plane.engine),
+      mapTargets: director.mapTargets(), fuelMinutes: enduranceMinutes(plane.engine), wind: windAt(plane, game.mission, game.time),
     });
   } else hud.clear();
 }
