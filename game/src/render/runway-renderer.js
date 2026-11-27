@@ -6,14 +6,15 @@ import { SURFACE_VERTEX, SURFACE_FRAGMENT } from './shaders.js';
 import { runwayEnds } from '../world/landmarks.js';
 import { createRandom } from '../core/seeded-random.js';
 
-const PX_PER_M_ACROSS = 4;
-const PX_PER_M_ALONG = 2.2;
+const PX_PER_M_ACROSS = 8;
+const PX_PER_M_ALONG = 5;
 const PAPI_ANGLES = [3.5, 3.17, 2.83, 2.5];
 
-function paintRunway(field, ends) {
+/** Paints a runway's surface and markings at up to `maxSize` pixels along, in metres scaled to pixels. */
+function paintRunway(field, ends, maxSize) {
   const canvas = document.createElement('canvas');
   canvas.width = Math.round((field.width + 8) * PX_PER_M_ACROSS);
-  canvas.height = Math.min(4096, Math.round(field.length * PX_PER_M_ALONG));
+  canvas.height = Math.min(maxSize, Math.round(field.length * PX_PER_M_ALONG));
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
@@ -25,15 +26,16 @@ function paintRunway(field, ends) {
   ctx.fillStyle = '#3b3d40';
   ctx.fillRect(4 * ax, 0, field.width * ax, H);
   const random = createRandom(field.length);
-  for (let i = 0; i < 9000; i++) {
-    ctx.fillStyle = `rgba(${random.chance(0.5) ? '255,255,255' : '0,0,0'},${random.range(0.03, 0.09)})`;
-    ctx.fillRect(4 * ax + random.range(0, field.width * ax), random.range(0, H), random.range(1, 3), random.range(1, 4));
+  const patches = Math.round(field.width * field.length * 0.12);
+  for (let i = 0; i < patches; i++) {
+    ctx.fillStyle = `rgba(${random.chance(0.5) ? '255,255,255' : '0,0,0'},${random.range(0.015, 0.045)})`;
+    ctx.fillRect(4 * ax + random.range(0, field.width * ax), random.range(0, H), random.range(0.6, 2.5) * ax, random.range(1, 5) * ay);
   }
   ctx.fillStyle = 'rgba(20,20,22,0.35)';
   for (const end of [0, 1]) {
     for (let k = 0; k < 40; k++) {
       const y = (end ? field.length - random.range(150, 600) : random.range(150, 600)) * ay;
-      ctx.fillRect(cx + random.range(-6, 6) * ax, y, random.range(2, 5), random.range(20, 80));
+      ctx.fillRect(cx + random.range(-6, 6) * ax, y, random.range(0.5, 1.2) * ax, random.range(9, 36) * ay);
     }
   }
   const white = '#e9e8e2';
@@ -80,7 +82,8 @@ export function createRunwayRenderer(gl, airfields, terrain) {
     const positions = new Float32Array([...corner(0, -half), ...corner(0, half), ...corner(1, half), ...corner(1, -half)]);
     const uvs = new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]);
     const mesh = createVertexArray(gl, [{ location: 0, data: positions, size: 3 }, { location: 1, data: uvs, size: 2 }], new Uint16Array([0, 2, 1, 0, 3, 2]));
-    return { field, ends, along, across, mesh, texture: createTextureFromCanvas(gl, paintRunway(field, ends), { repeat: false }) };
+    const maxSize = Math.min(8192, gl.getParameter(gl.MAX_TEXTURE_SIZE));
+    return { field, ends, along, across, mesh, texture: createTextureFromCanvas(gl, paintRunway(field, ends, maxSize), { repeat: false }) };
   });
 
   /** Elevation angle (degrees) from a PAPI box to a point, and which lights show white. */

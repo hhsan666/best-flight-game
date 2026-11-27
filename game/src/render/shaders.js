@@ -436,9 +436,15 @@ in vec2 vUv;
 out vec4 outColor;
 uniform sampler2D uSurfaceTexture;
 ${ATMOSPHERE}
+${NOISE}
 void main() {
   vec4 texel = texture(uSurfaceTexture, vUv);
-  vec3 color = litSurface(toLinear(texel.rgb), vec3(0.0, 1.0, 0.0), vWorld, 0.0);
+  // Asphalt grain where the painted texture runs out of detail: two octaves of noise in metres,
+  // faded out with distance before it can shimmer.
+  float near = 1.0 - smoothstep(25.0, 140.0, distance(vWorld, uCameraPos));
+  float grain = valueNoise(vWorld.xz * 6.0) * 0.6 + valueNoise(vWorld.xz * 1.7) * 0.4;
+  vec3 albedo = toLinear(texel.rgb) * (1.0 + (grain - 0.5) * 0.22 * near);
+  vec3 color = litSurface(albedo, vec3(0.0, 1.0, 0.0), vWorld, 0.0);
   outColor = vec4(toDisplay(applyFog(color, vWorld)), texel.a);
 }`;
 
