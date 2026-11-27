@@ -34,6 +34,14 @@ function recordBadge(record, total) {
   return record.previous === null ? '' : `<em class="best">Best ${record.previous}</em>`;
 }
 
+/** Under a finished run's total: the next medal up and how many points it still needs. */
+function nextMedalHint(mission, card) {
+  if (!mission.medals || card.medal === 'gold') return '';
+  const names = ['Gold', 'Silver', 'Bronze'];
+  const next = (card.medal ? names.indexOf(card.medal[0].toUpperCase() + card.medal.slice(1)) : 3) - 1;
+  return `<div class="medal-hint">${names[next]} at ${mission.medals[next]} · ${mission.medals[next] - card.total} more</div>`;
+}
+
 function medalBadge(medal, big = false) {
   if (!medal) return big ? '' : '<span class="medal"></span>';
   const letter = { gold: 'G', silver: 'S', bronze: 'B' }[medal];
@@ -88,7 +96,7 @@ export function createScreens(root, onAction) {
       show(`<div class="screen centre"><div class="card panel">
         <h3>Briefing</h3><h2>${escape(mission.title)}</h2>
         <p>${escape(mission.brief)}</p>
-        <div class="facts"><span class="fact">Sky <b>${escape(mission.sky)}</b></span><span class="fact">Wind <b>${describeWind(mission.wind)}</b></span><span class="fact">Fuel <b>${Math.round(mission.fuel * 100)}%</b></span>${routeKm ? `<span class="fact">Route <b>${routeKm.toFixed(1)} km</b></span>` : ''}${mission.par ? `<span class="fact">Par <b>${Math.floor(mission.par / 60)}:${String(mission.par % 60).padStart(2, '0')}</b></span>` : ''}</div>
+        <div class="facts"><span class="fact">Sky <b>${escape(mission.sky)}</b></span><span class="fact">Wind <b>${describeWind(mission.wind)}</b></span><span class="fact">Fuel <b>${Math.round(mission.fuel * 100)}%</b></span>${routeKm ? `<span class="fact">Route <b>${routeKm.toFixed(1)} km</b></span>` : ''}${mission.par ? `<span class="fact">Par <b>${Math.floor(mission.par / 60)}:${String(mission.par % 60).padStart(2, '0')}</b></span>` : ''}${mission.medals ? `<span class="fact">Medals <b>G ${mission.medals[0]} · S ${mission.medals[1]} · B ${mission.medals[2]}</b></span>` : ''}</div>
         <h3>Objectives</h3><ol class="steps">${mission.steps.map((s) => `<li>${escape(describeStep(s))}</li>`).join('')}</ol>
         <div class="actions"><button class="primary" data-action="fly">TAKE OFF</button><button class="ghost" data-action="help">How to fly</button><button class="ghost" data-action="title">Back</button></div>
       </div></div>`);
@@ -126,7 +134,7 @@ export function createScreens(root, onAction) {
           <div><div class="sub">${escape(mission.title)}</div><h2>${failed ? 'MISSION FAILED' : 'MISSION COMPLETE'}</h2></div>
           ${card.grade ? `<div class="grade">${card.grade}<small>LANDING</small></div>` : ''}
         </div>
-        ${failed ? `<div class="reason">${escape(reason)}</div>` : `${card.plot ? landingPlot(card.plot) : ''}<table class="score-table">${rows}</table><div class="score-total"><span>Total${card.medal ? ` · ${card.medal} medal` : ''}${recordBadge(record, card.total)}</span><span>${card.total}</span></div>`}
+        ${failed ? `<div class="reason">${escape(reason)}</div>` : `${card.plot ? landingPlot(card.plot) : ''}<table class="score-table">${rows}</table><div class="score-total"><span>Total${card.medal ? ` · ${card.medal} medal` : ''}${recordBadge(record, card.total)}</span><span>${card.total}</span></div>${nextMedalHint(mission, card)}`}
         <div class="actions"><button class="primary" data-action="restart">FLY AGAIN</button>${next ? `<button class="ghost" data-action="brief" data-mission="${next.id}">Next: ${escape(next.title)}</button>` : ''}<button class="ghost" data-action="title">Missions</button></div>
       </div></div>`);
     },
