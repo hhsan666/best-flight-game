@@ -252,6 +252,14 @@ void main() {
   vec3 color = skyRadiance(dir);
   float sd = dot(dir, uSunDir);
   color += uSunColor * smoothstep(0.99955, 0.99975, sd) * 3.0;
+  if (dir.y > 0.015) {
+    // High cirrus: wind-combed streaks on a far cloud deck, in patches, lit by the sun.
+    vec2 q = mat2(0.8, -0.6, 0.6, 0.8) * (dir.xz / (dir.y + 0.08) * 1.6);
+    float streak = valueNoise(q * vec2(1.2, 5.5)) * 0.6 + valueNoise(q * vec2(2.6, 11.0)) * 0.3 + valueNoise(q * vec2(5.0, 22.0)) * 0.1;
+    float patches = smoothstep(0.4, 0.8, valueNoise(q * 0.32 + 3.0));
+    float wisp = smoothstep(0.52, 0.86, streak) * patches * smoothstep(0.015, 0.22, dir.y);
+    color += wisp * 0.3 * (uSunColor * 0.55 + uSkyAmbient * 0.8) * (1.0 - uNight * 0.6);
+  }
   if (uNight > 0.01 && dir.y > 0.02) {
     vec2 sp = dir.xz / (dir.y + 0.25) * 260.0;
     float dark = 1.0 - smoothstep(0.02, 0.12, dot(color, vec3(0.3, 0.5, 0.2)));
