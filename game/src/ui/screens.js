@@ -27,6 +27,13 @@ function landingPlot(p) {
   </svg>`;
 }
 
+/** Beside the total: a new personal best (and by how much), or the best this run fell short of. */
+function recordBadge(record, total) {
+  if (!record) return '';
+  if (record.best) return `<em class="new-best">NEW BEST${record.previous === null ? '' : ` +${total - record.previous}`}</em>`;
+  return record.previous === null ? '' : `<em class="best">Best ${record.previous}</em>`;
+}
+
 function medalBadge(medal, big = false) {
   if (!medal) return big ? '' : '<span class="medal"></span>';
   const letter = { gold: 'G', silver: 'S', bronze: 'B' }[medal];
@@ -112,14 +119,14 @@ export function createScreens(root, onAction) {
         <div class="actions"><button class="primary" data-action="${back}">DONE</button></div>
       </div></div>`);
     },
-    results(mission, card, failed, reason, next) {
+    results(mission, card, failed, reason, next, record = null) {
       const rows = card.lines.map(([a, b, p]) => `<tr><td>${escape(a)}</td><td>${escape(b)}</td><td>${p > 0 ? '+' : ''}${p}</td></tr>`).join('');
       show(`<div class="screen results"><div class="result-card panel ${failed ? 'failed' : 'complete'}">
         <div class="result-head">${failed ? '' : medalBadge(card.medal, true)}
           <div><div class="sub">${escape(mission.title)}</div><h2>${failed ? 'MISSION FAILED' : 'MISSION COMPLETE'}</h2></div>
           ${card.grade ? `<div class="grade">${card.grade}<small>LANDING</small></div>` : ''}
         </div>
-        ${failed ? `<div class="reason">${escape(reason)}</div>` : `${card.plot ? landingPlot(card.plot) : ''}<table class="score-table">${rows}</table><div class="score-total"><span>Total${card.medal ? ` · ${card.medal} medal` : ''}</span><span>${card.total}</span></div>`}
+        ${failed ? `<div class="reason">${escape(reason)}</div>` : `${card.plot ? landingPlot(card.plot) : ''}<table class="score-table">${rows}</table><div class="score-total"><span>Total${card.medal ? ` · ${card.medal} medal` : ''}${recordBadge(record, card.total)}</span><span>${card.total}</span></div>`}
         <div class="actions"><button class="primary" data-action="restart">FLY AGAIN</button>${next ? `<button class="ghost" data-action="brief" data-mission="${next.id}">Next: ${escape(next.title)}</button>` : ''}<button class="ghost" data-action="title">Missions</button></div>
       </div></div>`);
     },

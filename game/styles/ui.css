@@ -91,6 +91,9 @@ kbd { font-family: var(--mono); font-size: 0.85em; padding: 0.05em 0.45em; borde
 .score-table td:last-child { text-align: right; font-family: var(--mono); color: var(--cream); }
 .score-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1.4vh; font-size: 2.4vh; font-weight: 800; }
 .score-total span:last-child { font-family: var(--mono); font-size: 3.6vh; color: var(--amber); }
+.score-total em { font-style: normal; margin-left: 1.2vh; padding: 0.35vh 0.9vh; border-radius: 0.6vh; font-size: 1.5vh; letter-spacing: 0.1em; vertical-align: 0.25vh; }
+.score-total .new-best { background: var(--amber); color: #2a1a02; }
+.score-total .best { border: 1px solid rgba(255, 255, 255, 0.25); color: var(--muted); font-weight: 700; }
 .grade { font-family: var(--mono); font-size: 4vh; font-weight: 900; color: var(--teal); margin-left: auto; text-align: center; line-height: 1; }
 .grade small { display: block; font-family: var(--sans); font-size: 1.3vh; letter-spacing: 0.2em; color: var(--muted); }
 .landing-plot { display: block; width: 100%; height: auto; margin: 0.4vh 0 0.8vh; font-family: inherit; }

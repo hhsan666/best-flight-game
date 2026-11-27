@@ -245,7 +245,8 @@ function showResults() {
   const director = game.director;
   const failed = director.state.status === 'failed';
   const card = director.scoreCard(game.plane);
-  if (!failed && game.mission.medals) recordResult(progress, game.mission.id, card);
+  const previous = progress[game.mission.id]?.score ?? null;
+  const record = !failed && game.mission.medals ? { best: recordResult(progress, game.mission.id, card), previous } : null;
   sound.cue(failed ? 'fail' : 'fanfare');
   const index = MISSIONS.indexOf(game.mission);
   game.mode = 'results';
@@ -253,7 +254,7 @@ function showResults() {
   input.releaseMouse();
   rig.mode = 'orbit';
   rig.orbitDistance = 22;
-  screens.results(game.mission, card, failed, director.state.failReason, MISSIONS[index + 1] ?? null);
+  screens.results(game.mission, card, failed, director.state.failReason, MISSIONS[index + 1] ?? null, record);
 }
 
 function renderFrame(dt, readout) {

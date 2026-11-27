@@ -220,7 +220,7 @@ const SHOTS = {
       up: [0, 1, 0], fov: 50,
     };
     const card = api.game.director.scoreCard(plane);
-    api.screens.results(mission, card, false, '', missionById('silverrun-gates'));
+    api.screens.results(mission, card, false, '', missionById('silverrun-gates'), { best: true, previous: 3620 });
   },
   /** The title screen and its mission list over the circling Saltrunner. */
   title(api) {
