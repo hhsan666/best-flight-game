@@ -1,22 +1,22 @@
 // Skerrywind: boot, the fixed-step game loop and the flow between title, briefing, flight, pause
 // and results. The world is rebuilt from one seed; ?shot=<name> stages a screenshot scene instead.
-import { buildWorld } from './world/world-builder.js';
-import { DEFAULT_SEED } from './world/landmarks.js';
-import { buildAtmosphere } from './world/sky-presets.js';
 import { createAircraft, stepAircraft, applyPilotInput, flightReadout, PHYSICS_STEP } from './flight/flight-dynamics.js';
 import { SALTRUNNER } from './flight/aircraft-spec.js';
 import { enduranceMinutes } from './flight/powerplant.js';
 import { MISSIONS, missionById } from './missions/mission-catalog.js';
 import { createMissionDirector, spawnFor } from './missions/mission-director.js';
-import { createSceneRenderer } from './render/scene-renderer.js';
-import { createCameraRig } from './render/camera-rig.js';
-import { createParticleSystem } from './render/particle-system.js';
 import { createFlightHud, HUD_COLOURS } from './hud/flight-hud.js';
 import { createMinimap } from './hud/minimap.js';
 import { createPilotInput } from './input/pilot-input.js';
 import { createSoundEngine } from './audio/sound-engine.js';
 import { createScreens } from './ui/screens.js';
 import { loadSettings, saveSettings, loadProgress, recordResult } from './ui/settings-store.js';
+import { buildWorld } from './world/world-builder.js';
+import { DEFAULT_SEED } from './world/landmarks.js';
+import { buildAtmosphere } from './world/sky-presets.js';
+import { createSceneRenderer } from './render/scene-renderer.js';
+import { createCameraRig } from './render/camera-rig.js';
+import { createParticleSystem } from './render/particle-system.js';
 import { stageShot } from './shots/shot-scenes.js';
 import { quatRotate, add } from './core/vector-math.js';
 import { smoothstep } from './core/noise.js';
