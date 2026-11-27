@@ -1,7 +1,8 @@
 // Captures screenshots/ from the game itself: serves game/ on a local port, opens each staged
-// scene (index.html?shot=<scene>) in headless Chromium at 768x480, waits until the game reports
-// the frame is drawn, and saves the browser's own JPEG capture (lowering quality until it is at
-// most 256 KiB). Nothing is edited or composited afterwards.
+// scene (index.html?shot=<scene>) in headless Chromium at 768x480 CSS pixels with a device pixel
+// ratio of 2 (the game renders at 1536x960), waits until the game reports the frame is drawn, and
+// saves the browser's own JPEG capture at CSS size, so the browser's downsampling smooths the edges
+// (lowering quality until it is at most 256 KiB). Nothing is edited or composited afterwards.
 //
 //   node tools/capture-shots.mjs [scene ...]     (needs Playwright with Chromium)
 import { createServer } from 'node:http';
@@ -41,14 +42,14 @@ const wanted = process.argv.slice(2);
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 mkdirSync(join(root, 'screenshots'), { recursive: true });
 for (const shot of SHOTS.filter((s) => wanted.length === 0 || wanted.includes(s.scene))) {
-  const page = await browser.newPage({ viewport: { width: 768, height: 480 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 768, height: 480 }, deviceScaleFactor: 2 });
   page.on('pageerror', (e) => console.error(`[${shot.scene}] ${e.message}`));
   await page.goto(`${base}/index.html?shot=${shot.scene}&seed=7`);
   await page.waitForFunction(() => window.__shotReady === true, null, { timeout: 120000 });
   let quality = 92;
   let bytes;
   do {
-    bytes = await page.screenshot({ type: 'jpeg', quality });
+    bytes = await page.screenshot({ type: 'jpeg', quality, scale: 'css' });
     quality -= 4;
   } while (bytes.length > MAX_BYTES && quality > 30);
   writeFileSync(join(root, 'screenshots', shot.file), bytes);
