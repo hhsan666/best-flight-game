@@ -16,8 +16,12 @@ synthesised with Web Audio; the game loads no library, font or file from the net
 - **Missions**: *First Light* (take off, seven harbour rings, land), *Silverrun Gates* (a timed
   canyon run), *Mail to Ostmere* (a fuel-tight crossing into a headwind), *Squall Final* (a gusty
   crosswind landing), *Lantern Run* (dusk rings and a night landing), and *Free Flight*.
+- **Sortie card**: each mission's steps as a checklist, a running score (rings threaded near their
+  centre score more), the par time, and the fuel the rest of the route needs at your ground speed
+  set against what is left in the tank at the present throttle.
 - **Landings are graded** on sink rate, centreline, touchdown point and bank, with a working PAPI
-  beside each runway; crashes say what happened ("The gear collapsed: touchdown at 960 ft/min").
+  beside each runway, and the results card plots the touchdown and rollout on the runway; crashes
+  say what happened ("The gear collapsed: touchdown at 960 ft/min").
 - **Cockpit**: airspeed, altitude and heading tapes, a flight-path marker, a moving map, and a
   backlit panel of six gauges (airspeed, attitude, altimeter, heading with course needle, vertical
   speed, RPM and fuel). Chase, wing-chase, cockpit and orbit cameras.
