@@ -47,6 +47,8 @@ function clearRings(st, offsets) {
   st.cleared = offsets.length;
   st.offsets = [...offsets];
   st.ringScore = offsets.reduce((sum, offset, i) => sum + ringPoints(offset, st.rings[i].radius), 0);
+  const last = offsets.length - 1;
+  st.lastRing = last < 0 ? null : { points: ringPoints(offsets[last], st.rings[last].radius), offset: offsets[last] };
 }
 
 function settleChase(api) {

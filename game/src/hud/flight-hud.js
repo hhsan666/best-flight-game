@@ -331,7 +331,8 @@ export function createFlightHud(canvas, minimap) {
     const x = 22 * u;
     const y = 12 * u;
     const w = Math.min(250 * u, W * 0.3);
-    glassPanel(x, y, w, 94 * u);
+    const lastRingRow = Boolean(m.lastRing) && m.score !== null && m.score !== undefined;
+    glassPanel(x, y, w, (lastRingRow ? 110 : 94) * u);
     text(m.title.toUpperCase(), x + 10 * u, y + 13 * u, 12 * u, AMBER, 'left', 800);
     text(m.time, x + w - 10 * u, y + 13 * u, 14 * u, '#ffffff', 'right', 700, MONO);
     text(m.objective, x + 10 * u, y + 32 * u, 13 * u, '#ffffff', 'left', 600);
@@ -348,6 +349,11 @@ export function createFlightHud(canvas, minimap) {
     const wind = m.wind ? `WIND ${String(m.wind.from).padStart(3, '0')}°/${m.wind.knots}${m.wind.gust >= 5 ? `G${m.wind.knots + m.wind.gust}` : ''} KT` : '';
     text(m.score !== null && m.score !== undefined ? `SCORE ${m.score}` : wind, x + 10 * u, y + 80 * u, 11.5 * u, '#ffffff', 'left', 700, MONO);
     if (m.par) text(`PAR ${m.par}`, x + w - 10 * u, y + 80 * u, 11.5 * u, m.overPar ? RED : GREEN, 'right', 700, MONO);
+    if (lastRingRow) {
+      const last = m.lastRing;
+      const label = last.offset === null ? `LAST RING MISSED  ${last.points}` : `LAST RING +${last.points} · ${last.offset.toFixed(1)} m off centre`;
+      text(label, x + 10 * u, y + 97 * u, 10.5 * u, last.offset === null ? RED : '#9dffc6', 'left', 700);
+    }
   }
 
   function warnings(list, time) {

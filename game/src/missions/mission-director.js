@@ -99,12 +99,14 @@ export function createMissionDirector(world, mission) {
       st.cleared += 1;
       st.ringScore += points;
       st.offsets.push(offset);
+      st.lastRing = { points, offset };
       ring.clearedAt = st.elapsed;
       say(`RING ${st.nextRing + 1}/${st.rings.length}  ${offset.toFixed(1)} m off centre  +${points}`, '#9dffc6', true);
       st.lastEvent = 'ring';
     } else if (offset <= ring.radius * 4) {
       st.missed += 1;
       st.ringScore -= 100;
+      st.lastRing = { points: -100, offset: null };
       say(`MISSED RING ${st.nextRing + 1}  −100`, '#ff7a6b', true);
       st.lastEvent = 'miss';
     } else return;
@@ -250,7 +252,7 @@ export function createMissionDirector(world, mission) {
     hudMission(plane) {
       return {
         title: mission.title, objective: this.objective(), time: formatTime(st.elapsed), progress: this.progress(),
-        checklist: this.checklist(), score: mission.steps.some((step) => step.type === 'rings') ? st.ringScore : null, wind: mission.wind,
+        checklist: this.checklist(), score: mission.steps.some((step) => step.type === 'rings') ? st.ringScore : null, lastRing: st.lastRing ?? null, wind: mission.wind,
         par: mission.par ? formatTime(mission.par) : null,
         overPar: mission.par ? st.elapsed > mission.par : false, fuelNeeded: plane ? this.fuelNeeded(plane) : null,
       };
