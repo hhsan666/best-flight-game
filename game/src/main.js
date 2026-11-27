@@ -85,13 +85,19 @@ function showTitle() {
   screens.title(progress);
 }
 
+/** The length of a mission's route from where it starts, for the briefing (null for free flight). */
+function routeKilometres(mission) {
+  if (mission.steps.some((step) => step.type === 'explore')) return null;
+  return createMissionDirector(world, mission).routeAhead({ position: spawnFor(mission).position }) / 1000;
+}
+
 function handleAction(action, data) {
   sound.start();
   sound.cue('click');
   if (action === 'brief') {
     game.mission = missionById(data.mission);
     game.atmosphere = buildAtmosphere(game.mission.sky);
-    screens.briefing(game.mission);
+    screens.briefing(game.mission, routeKilometres(game.mission));
   } else if (action === 'fly' || action === 'restart') startMission(game.mission ?? MISSIONS[0]);
   else if (action === 'title') showTitle();
   else if (action === 'resume') {
@@ -105,7 +111,7 @@ function handleAction(action, data) {
     game.back = game.mode === 'paused' ? 'pause' : 'title';
     screens.settings(settings, game.back);
   } else if (action === 'pause') screens.pause();
-  else if (action === 'brief-back') screens.briefing(game.mission);
+  else if (action === 'brief-back') screens.briefing(game.mission, routeKilometres(game.mission));
   else if (action === 'setting') {
     settings[data.name] = data.value;
     if (data.name === 'volume') sound.setVolume(data.value);

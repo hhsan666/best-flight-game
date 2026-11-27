@@ -77,11 +77,11 @@ export function createScreens(root, onAction) {
         <div class="tagline-strip">Saltrunner SR-2 · The Skerrywind Isles</div>
       </div>`);
     },
-    briefing(mission) {
+    briefing(mission, routeKm = null) {
       show(`<div class="screen centre"><div class="card panel">
         <h3>Briefing</h3><h2>${escape(mission.title)}</h2>
         <p>${escape(mission.brief)}</p>
-        <div class="facts"><span class="fact">Sky <b>${escape(mission.sky)}</b></span><span class="fact">Wind <b>${describeWind(mission.wind)}</b></span><span class="fact">Fuel <b>${Math.round(mission.fuel * 100)}%</b></span>${mission.par ? `<span class="fact">Par <b>${Math.floor(mission.par / 60)}:${String(mission.par % 60).padStart(2, '0')}</b></span>` : ''}</div>
+        <div class="facts"><span class="fact">Sky <b>${escape(mission.sky)}</b></span><span class="fact">Wind <b>${describeWind(mission.wind)}</b></span><span class="fact">Fuel <b>${Math.round(mission.fuel * 100)}%</b></span>${routeKm ? `<span class="fact">Route <b>${routeKm.toFixed(1)} km</b></span>` : ''}${mission.par ? `<span class="fact">Par <b>${Math.floor(mission.par / 60)}:${String(mission.par % 60).padStart(2, '0')}</b></span>` : ''}</div>
         <h3>Objectives</h3><ol class="steps">${mission.steps.map((s) => `<li>${escape(describeStep(s))}</li>`).join('')}</ol>
         <div class="actions"><button class="primary" data-action="fly">TAKE OFF</button><button class="ghost" data-action="help">How to fly</button><button class="ghost" data-action="title">Back</button></div>
       </div></div>`);
