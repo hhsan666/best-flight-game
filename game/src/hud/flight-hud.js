@@ -42,7 +42,7 @@ export function createFlightHud(canvas, minimap) {
     const w = 72 * u;
     const h = 236 * u;
     const x = 22 * u;
-    const cy = H * 0.43;
+    const cy = H * 0.47;
     const perKt = h / 80;
     glassPanel(x, cy - h / 2, w, h);
     ctx.save();
@@ -72,7 +72,7 @@ export function createFlightHud(canvas, minimap) {
     const w = 84 * u;
     const h = 236 * u;
     const x = W - 22 * u - w;
-    const cy = H * 0.43;
+    const cy = H * 0.47;
     const perFoot = h / 800;
     glassPanel(x, cy - h / 2, w, h);
     ctx.save();
