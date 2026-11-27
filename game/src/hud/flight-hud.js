@@ -367,16 +367,29 @@ export function createFlightHud(canvas, minimap) {
       const fuelMin = view.fuelMinutes;
       const clock = (m) => `${Math.floor(m)}:${String(Math.floor((m % 1) * 60)).padStart(2, '0')}`;
       const need = view.mission?.fuelNeeded;
-      const chipW = Number.isFinite(need) ? 150 * u : 104 * u;
-      const right = Math.min(W - 8 * u - chipW, W / 2 + panelWidth / 2 + 12 * u);
-      glassPanel(right, H - 82 * u, chipW, 22 * u, 5 * u);
+      const planned = Number.isFinite(need);
+      const panelRight = W / 2 + panelWidth / 2 + 12 * u;
+      // FUEL and NEED share one wide chip where the panel leaves room, else stack in a taller narrow one.
+      const wide = planned && W - 8 * u - panelRight >= 150 * u;
+      const chipW = wide ? 150 * u : 104 * u;
+      const fuelH = planned && !wide ? 38 * u : 22 * u;
+      const right = Math.min(W - 8 * u - chipW, panelRight);
+      const top = H - 60 * u - fuelH;
+      glassPanel(right, top, chipW, fuelH, 5 * u);
       const fuelText = Number.isFinite(fuelMin) ? `FUEL ${clock(fuelMin)}` : 'FUEL --';
-      if (Number.isFinite(need)) {
+      const fuelColour = fuelMin < 1.5 ? RED : '#ffffff';
+      if (planned) {
         // Endurance at the present fuel flow against what the rest of the route needs at this ground speed.
         const margin = Number.isFinite(fuelMin) ? fuelMin / Math.max(need, 0.01) : Infinity;
-        text(fuelText, right + 8 * u, H - 71 * u, 12 * u, fuelMin < 1.5 ? RED : '#ffffff', 'left', 800);
-        text(`NEED ${clock(need)}`, right + chipW - 8 * u, H - 71 * u, 12 * u, margin < 1 ? RED : margin < 1.25 ? AMBER : GREEN, 'right', 800);
-      } else text(fuelText, right + chipW / 2, H - 71 * u, 12 * u, fuelMin < 1.5 ? RED : '#ffffff', 'center', 800);
+        const needColour = margin < 1 ? RED : margin < 1.25 ? AMBER : GREEN;
+        if (wide) {
+          text(fuelText, right + 8 * u, top + 11 * u, 12 * u, fuelColour, 'left', 800);
+          text(`NEED ${clock(need)}`, right + chipW - 8 * u, top + 11 * u, 12 * u, needColour, 'right', 800);
+        } else {
+          text(fuelText, right + chipW / 2, top + 11 * u, 12 * u, fuelColour, 'center', 800);
+          text(`NEED ${clock(need)}`, right + chipW / 2, top + 27 * u, 12 * u, needColour, 'center', 800);
+        }
+      } else text(fuelText, right + chipW / 2, top + 11 * u, 12 * u, fuelColour, 'center', 800);
       glassPanel(right, H - 56 * u, chipW, 22 * u, 5 * u);
       text(`DAMAGE ${Math.round(plane.airframe.damage * 100)}%`, right + chipW / 2, H - 45 * u, 12 * u, plane.airframe.damage > 0.3 ? RED : '#ffffff', 'center', 800);
       glassPanel(right, H - 30 * u, chipW, 22 * u, 5 * u);
