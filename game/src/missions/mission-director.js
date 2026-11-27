@@ -165,7 +165,8 @@ export function createMissionDirector(world, mission) {
         }
       } else if (step.type === 'land' || step.type === 'explore') checkLanding(plane, readout, step, dt, airborneBefore);
       const edge = Math.max(Math.abs(plane.position[0]), Math.abs(plane.position[2])) - world.terrain.half;
-      if (edge > 0 && !st.warned) {
+      const outward = plane.position[0] * plane.velocity[0] + plane.position[2] * plane.velocity[2] > 0;
+      if (edge > 0 && outward && !st.warned) {
         st.warned = true;
         say('LEAVING THE ISLES — TURN BACK', '#ffc23a', true, 4);
       }

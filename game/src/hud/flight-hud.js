@@ -411,7 +411,7 @@ export function createFlightHud(canvas, minimap) {
       headingTape(readout.heading, view.course, view.wind);
       missionPanel(view.mission);
       warnings(view.warnings, view.time);
-      let my = 96 * u;
+      let my = 134 * u;
       for (const m of view.messages) {
         ctx.globalAlpha = Math.min(1, m.life);
         text(m.text, W / 2, my, (m.big ? 24 : 17) * u, m.colour ?? '#ffffff', 'center', 800);
