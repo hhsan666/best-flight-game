@@ -226,21 +226,25 @@ export function createMissionDirector(world, mission) {
       });
     },
     /** Metres still to fly: through the rings left, then to each field the remaining steps name. */
+    /** The rest of the sortie in order: each ring still to thread, then the field to reach or land on. */
+    routePoints() {
+      const points = [];
+      for (let i = st.step; i < mission.steps.length; i++) {
+        const step = mission.steps[i];
+        if (step.type === 'rings') points.push(...(i === st.step ? st.rings.slice(st.nextRing) : courseOf(step)).map((r) => ({ at: r.position, field: false })));
+        else if (step.type === 'fly-to' || (step.type === 'land' && (i === st.step || mission.steps[i - 1]?.type !== 'fly-to'))) {
+          const f = fieldById(step.airfield);
+          points.push({ at: [f.x, f.elevation, f.z], field: true });
+        }
+      }
+      return points;
+    },
     routeAhead(plane) {
       let from = plane.position;
       let metres = 0;
-      for (let i = st.step; i < mission.steps.length; i++) {
-        const step = mission.steps[i];
-        let points = [];
-        if (step.type === 'rings') points = (i === st.step ? st.rings.slice(st.nextRing) : courseOf(step)).map((r) => r.position);
-        else if (step.type === 'fly-to' || (step.type === 'land' && (i === st.step || mission.steps[i - 1]?.type !== 'fly-to'))) {
-          const f = fieldById(step.airfield);
-          points = [[f.x, f.elevation, f.z]];
-        }
-        for (const p of points) {
-          metres += Math.hypot(p[0] - from[0], p[2] - from[2]);
-          from = p;
-        }
+      for (const { at } of this.routePoints()) {
+        metres += Math.hypot(at[0] - from[0], at[2] - from[2]);
+        from = at;
       }
       return metres;
     },
@@ -258,8 +262,10 @@ export function createMissionDirector(world, mission) {
         overPar: mission.par ? st.elapsed > mission.par : false, fuelNeeded: plane ? this.fuelNeeded(plane) : null,
       };
     },
+    /** What the moving map plots: the next stretch of the route, joined by a line from the aircraft. */
     mapTargets() {
-      return st.rings.slice(st.nextRing, st.nextRing + 6).map((r, i) => ({ x: r.position[0], z: r.position[2], next: i === 0 }));
+      if (st.status !== 'flying') return [];
+      return this.routePoints().slice(0, 8).map((p, i) => ({ x: p.at[0], z: p.at[2], next: i === 0, field: p.field }));
     },
     /** The score card shown on the results screen. */
     scoreCard(plane) {

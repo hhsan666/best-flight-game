@@ -1,5 +1,6 @@
 // A track-up moving map: the archipelago painted once from the heightfield (sea depth, beaches,
-// fields, rock and snow, hill shading), with runways, the course's rings and your aircraft.
+// fields, rock and snow, hill shading), with runways, the route still to fly (rings, then the
+// field to land on, joined by a dashed line) and your aircraft.
 import { AIRFIELDS, TOWNS, runwayEnds } from '../world/landmarks.js';
 import { SANS } from './instrument-panel.js';
 
@@ -75,14 +76,37 @@ export function createMinimap(terrain) {
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate((-headingDeg * Math.PI) / 180);
+      ctx.beginPath();
+      ctx.arc(0, 0, r - 1, 0, Math.PI * 2);
+      ctx.clip();
+      const offset = (t) => [(t.x - plane.position[0]) * k, (t.z - plane.position[2]) * k];
+      if (targets.length) {
+        // The route still to fly: a dashed line from the aircraft through each ring to the field.
+        ctx.strokeStyle = 'rgba(255,194,58,0.85)';
+        ctx.lineWidth = Math.max(1.2, r * 0.028);
+        ctx.setLineDash([r * 0.07, r * 0.05]);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        for (const t of targets) ctx.lineTo(...offset(t));
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
       for (const t of targets) {
-        const dx = (t.x - plane.position[0]) * k;
-        const dz = (t.z - plane.position[2]) * k;
+        const [dx, dz] = offset(t);
         const d = Math.hypot(dx, dz);
         const s = d > r - 6 ? (r - 6) / d : 1;
+        const [px, pz] = [dx * s, dz * s];
         ctx.fillStyle = t.next ? '#ffc23a' : 'rgba(255,240,200,0.75)';
         ctx.beginPath();
-        ctx.arc(dx * s, dz * s, t.next ? r * 0.07 : r * 0.04, 0, Math.PI * 2);
+        if (t.field) {
+          // A field to reach or land on: a diamond, like the runway marker in the view.
+          const q = r * (t.next ? 0.1 : 0.08);
+          ctx.moveTo(px, pz - q);
+          ctx.lineTo(px + q, pz);
+          ctx.lineTo(px, pz + q);
+          ctx.lineTo(px - q, pz);
+          ctx.closePath();
+        } else ctx.arc(px, pz, t.next ? r * 0.07 : r * 0.04, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
